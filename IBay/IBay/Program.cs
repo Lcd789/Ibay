@@ -13,7 +13,7 @@ namespace IBay
             // Add services to the container.
             builder.Services.AddScoped<IIbayContext, IbayContext>();
             builder.Services.AddControllers();
-            builder.Services.AddDbContext<IbayContext>();
+            //builder.Services.AddDbContext<IbayContext>();
             
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();

@@ -19,17 +19,38 @@ namespace IBay.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(User user)
+        public IActionResult Create(string UserPseudo, string UserEmail, string UserPassword)
         {
-            User newUser = _context.CreateUser(user);
+            User newUser = _context.CreateUser(UserPseudo, UserEmail, UserPassword);
             return Ok(newUser);
-            
         }
 
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
             User user = _context.GetUserById(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            return Ok(user);
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult Update(int id, [FromBody] User user)
+        {
+            User updatedUser = _context.UpdateUser(id, user.UserEmail, user.UserPseudo, user.UserPassword);
+            if (updatedUser == null)
+            {
+                return NotFound();
+            }
+            return Ok(updatedUser);
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            User user = _context.DeleteUser(id);
             if (user == null)
             {
                 return NotFound();

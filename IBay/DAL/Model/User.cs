@@ -15,7 +15,6 @@ namespace DAL.Model
     {
         StandardUser,
         Banned,
-        Moderator,
         Admin
     }
 
@@ -46,16 +45,26 @@ namespace DAL.Model
         [DataType(DataType.Password)]
         public string UserPassword { get; set; }
 
+        // UserMoney is at least 0 and cannot be negative
+        [Column(TypeName = "decimal(18,2)")]
+        [DefaultValue(0)]
+        public double UserMoney { get; set; }
+
         [Required]
         [EnumDataType(typeof(UserRole))]
         [DefaultValue(UserRole.StandardUser)]
         public UserRole UserRole { get; set; }
 
+        public List<Product> AddedProducts { get; set; }
+
+        public List<Product> UserCart { get; set; }
+
+        public List<Product> UserProducts { get; set; }
+
         [Required]
         public DateTime CreationDate { get; set; }
 
-        // Navigation property for one-to-one relationship with ShoppingCart
-        public Cart UserCart { get; set; }
+        public DateTime? UpdatedDate { get; set; }
 
     }
 }

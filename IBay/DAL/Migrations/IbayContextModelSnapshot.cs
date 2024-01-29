@@ -19,29 +19,6 @@ namespace DAL.Migrations
                 .HasAnnotation("ProductVersion", "8.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("DAL.Model.Cart", b =>
-                {
-                    b.Property<int>("CartId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("CartId");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("Carts");
-                });
-
             modelBuilder.Entity("DAL.Model.Product", b =>
                 {
                     b.Property<int>("ProductId")
@@ -53,9 +30,6 @@ namespace DAL.Migrations
 
                     b.Property<bool>("Available")
                         .HasColumnType("tinyint(1)");
-
-                    b.Property<int?>("CartId")
-                        .HasColumnType("int");
 
                     b.Property<string>("ProductDescription")
                         .IsRequired()
@@ -76,14 +50,22 @@ namespace DAL.Migrations
                     b.Property<int>("SellerId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("UpdatedTime")
+                    b.Property<DateTime?>("UpdatedTime")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserId1")
+                        .HasColumnType("int");
 
                     b.HasKey("ProductId");
 
-                    b.HasIndex("CartId");
-
                     b.HasIndex("SellerId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("Products");
                 });
@@ -97,10 +79,16 @@ namespace DAL.Migrations
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("UserEmail")
                         .IsRequired()
                         .HasMaxLength(80)
                         .HasColumnType("varchar(80)");
+
+                    b.Property<decimal>("UserMoney")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("UserPassword")
                         .IsRequired()
@@ -120,41 +108,32 @@ namespace DAL.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("DAL.Model.Cart", b =>
-                {
-                    b.HasOne("DAL.Model.User", "User")
-                        .WithOne("UserCart")
-                        .HasForeignKey("DAL.Model.Cart", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("DAL.Model.Product", b =>
                 {
-                    b.HasOne("DAL.Model.Cart", null)
-                        .WithMany("Products")
-                        .HasForeignKey("CartId");
-
                     b.HasOne("DAL.Model.User", "Seller")
-                        .WithMany()
+                        .WithMany("AddedProducts")
                         .HasForeignKey("SellerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("DAL.Model.User", null)
+                        .WithMany("UserCart")
+                        .HasForeignKey("UserId");
+
+                    b.HasOne("DAL.Model.User", null)
+                        .WithMany("UserProducts")
+                        .HasForeignKey("UserId1");
 
                     b.Navigation("Seller");
                 });
 
-            modelBuilder.Entity("DAL.Model.Cart", b =>
-                {
-                    b.Navigation("Products");
-                });
-
             modelBuilder.Entity("DAL.Model.User", b =>
                 {
-                    b.Navigation("UserCart")
-                        .IsRequired();
+                    b.Navigation("AddedProducts");
+
+                    b.Navigation("UserCart");
+
+                    b.Navigation("UserProducts");
                 });
 #pragma warning restore 612, 618
         }

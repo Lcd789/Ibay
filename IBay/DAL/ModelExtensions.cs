@@ -32,16 +32,5 @@ namespace DAL
             }
             return string.Empty;
         }
-
-        public static string ValidateCart(this Cart cart)
-        {
-            List<ValidationResult> validationResults = new List<ValidationResult>();
-            if (!Validator.TryValidateObject(cart, new ValidationContext(cart), validationResults, true))
-            {
-                string errorMessage = string.Join(Environment.NewLine, validationResults.Select(x => x.ErrorMessage));
-                return errorMessage;
-            }
-            return string.Empty;
-        }
     }
 }

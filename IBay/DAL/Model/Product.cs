@@ -27,16 +27,29 @@ namespace DAL.Model
 
         [Required]
         [Column(TypeName = "decimal(18,2)")]
-        public decimal ProductPrice { get; set; }
+        [DefaultValue(0.01)]
+        public double ProductPrice { get; set; }
+
+        // ProductStock is at least 0 and cannot be negative
+        [Required]
+        [DefaultValue(0)]
+        public int ProductStock { get; set; }
 
         [Required]
-        public int ProductStock { get; set; }
-        [Required]
         public bool Available { get; set; }
+        /* Arguments for later, for now we only need the above
+        public string? ProductImage { get; set; }
+
+        public string? Category { get; set; }
+
+        public string? SubCategory { get; set; }
+
+        public string? Brand { get; set; }
+        */
         [Required]
         public DateTime AddedTime { get; set; }
 
-        public DateTime UpdatedTime { get; set; }
+        public DateTime? UpdatedTime { get; set; }
 
         // Foreign key for the seller (User)
         [Required]
