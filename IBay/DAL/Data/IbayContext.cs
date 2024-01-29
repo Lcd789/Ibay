@@ -21,14 +21,20 @@ namespace DAL.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            string LOUIS_Bdd = "Data Source=HELIX\\SQLExpress;Initial Catalog=IBAY2;Integrated Security=True;Trust Server Certificate=True";
-
-            // Pour lorsqu'on récupère le projet, il faut mettre le chemin de sa bdd
-            string MATHIS_Bdd = ""; 
-            string SAMY_Bdd = "";
-
-            var connectionString = LOUIS_Bdd; // mettre la variable de SA PROPRE BDD LOCALE
-            optionsBuilder.UseSqlServer(connectionString);
+            if (!optionsBuilder.IsConfigured)
+            {
+                var connectionString = "server=bc81bou7c6hqehj9n497-mysql.services.clever-cloud.com;" +
+                                       "user=ukkodujekl2bm0ya;" +
+                                       "password=0uT89hoAL5YM644TecQ7;" +
+                                       "database=bc81bou7c6hqehj9n497\n";
+                
+                var serverVersion = new MySqlServerVersion(new Version(8, 0, 34));
+                
+                optionsBuilder.UseMySql(connectionString, serverVersion)
+                    .LogTo(Console.WriteLine)
+                    .EnableSensitiveDataLogging()
+                    .EnableDetailedErrors();
+            }
         }
 
         // User
