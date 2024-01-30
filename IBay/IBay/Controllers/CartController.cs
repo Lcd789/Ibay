@@ -1,24 +1,13 @@
 ﻿using DAL.Data;
-using DAL.Model;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IBay.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CartController : ControllerBase
+    public class CartController(IIbayContext context) : ControllerBase
     {
-        //Création d'un contexte pour pouvoir utiliser les méthodes du DAL
-        private IIbayContext _context;
-
-        public CartController(IIbayContext context)
-        {
-            _context = context;
-        }
-
-        // Méthode pour acheter le panier d'un utilisateur
-        [HttpPost("{id}")]
+        [HttpPost("{id:int}")]
         /// <summary> Achat du panier du User </summary>
         /// <param name="id"> Id du User </param>
         /// <returns> Le User avec le panier acheté </returns>
@@ -31,7 +20,7 @@ namespace IBay.Controllers
         /// <response code="404"> Le produit n'est pas disponible </response>
         public IActionResult BuyCart(int id)
         {
-            User user = _context.BuyCart(id);
+            var user = context.BuyCart(id);
             if (user == null)
             {
                 return NotFound();
@@ -39,7 +28,7 @@ namespace IBay.Controllers
             return Ok(user);
         }
 
-        [HttpPut("{userId}")]
+        [HttpPut("{userId:int}")]
         /// <summary> Ajoute la quantité demandée du produit au panier du User </summary>
         /// <param name="userId"> Id du User </param>
         /// <param name="productId"> Id du produit </param>
@@ -53,7 +42,7 @@ namespace IBay.Controllers
         /// <response code="404"> Le produit n'existe pas </response>
         public IActionResult AddProductToCart(int userId, int productId, int quantity)
         {
-            User user = _context.AddProductToCart(userId, productId, quantity);
+            var user = context.AddProductToCart(userId, productId, quantity);
             if (user == null)
             {
                 return NotFound();
@@ -61,7 +50,7 @@ namespace IBay.Controllers
             return Ok(user);
         }
 
-        [HttpDelete("{userId}")]
+        [HttpDelete("{userId:int}")]
         /// <summary> "Retire la quantité demandée du produit du panier du User" </summary>
         /// <param name="userId"> Id du User </param>
         /// <param name="productId"> Id du produit </param>
@@ -76,7 +65,7 @@ namespace IBay.Controllers
         /// <response code="404"> Le Seller n'existe pas </response>
         public IActionResult RemoveProductFromCart(int userId, int productId, int quantity)
         {
-            User user = _context.RemoveProductFromCart(userId, productId, quantity);
+            var user = context.RemoveProductFromCart(userId, productId, quantity);
             if (user == null)
             {
                 return NotFound();
@@ -84,7 +73,7 @@ namespace IBay.Controllers
             return Ok(user);
         }
 
-        [HttpGet("{userId}")]
+        [HttpGet("{userId:int}")]
         /// <summary> "Retourne le panier du User" </summary>
         /// <param name="userId"> Id du User </param>
         /// <returns> Le panier du User </returns>
@@ -92,14 +81,12 @@ namespace IBay.Controllers
         /// <response code="404"> Le User n'existe pas </response>
         public IActionResult GetCart(int userId)
         {
-            User user = _context.GetUserById(userId);
+            var user = context.GetUserById(userId);
             if (user == null)
             {
                 return NotFound();
             }
             return Ok(user.UserCart.ToList());
         }
-
-
     }
 }

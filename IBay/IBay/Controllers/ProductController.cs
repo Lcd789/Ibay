@@ -1,34 +1,24 @@
 ﻿using DAL.Data;
 using DAL.Model;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IBay.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ProductController : ControllerBase
+    public class ProductController(IIbayContext context) : ControllerBase
     {
-        //Création d'un contexte pour pouvoir utiliser les méthodes du DAL
-        private IIbayContext _context;
-
-        public ProductController(IIbayContext context)
+        [HttpPost("{sellerId:int}")]
+        public IActionResult Create(int sellerId, string productName, string productDescription, double productPrice, int productStock)
         {
-            _context = context;
-        }
-
-        [HttpPost("{sellerId}")]
-        public IActionResult Create(int sellerId, string productname, string productDescription, double productPrice, int productStock)
-        {
-            Product newProduct = _context.CreateProduct(sellerId, productname, productDescription, productPrice, productStock);
+            var newProduct = context.CreateProduct(sellerId, productName, productDescription, productPrice, productStock);
             return Ok(newProduct);
-            
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public IActionResult Get(int id)
         {
-            Product product = _context.GetProductById(id);
+            var product = context.GetProductById(id);
             if (product == null)
             {
                 return NotFound();
@@ -36,10 +26,10 @@ namespace IBay.Controllers
             return Ok(product);
         }
 
-        [HttpGet("{userid}")]
+        [HttpGet("user/{userid:int}/products")]
         public IActionResult GetProductsOnSale(int userId)
         {
-            List<Product> product = _context.GetProductsOnSale(userId).ToList();
+            var product = context.GetProductsOnSale(userId).ToList();
             if (product == null)
             {
                 return NotFound();
@@ -47,10 +37,10 @@ namespace IBay.Controllers
             return Ok(product);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         public IActionResult Update(int id, [FromBody] Product product)
         {
-            Product updatedProduct = _context.UpdateProduct(id, product.ProductName, product.ProductDescription, product.ProductPrice, product.ProductStock) ;
+            var updatedProduct = context.UpdateProduct(id, product.ProductName, product.ProductDescription, product.ProductPrice, product.ProductStock, product.Available) ;
             if (updatedProduct == null)
             {
                 return NotFound();
@@ -58,17 +48,15 @@ namespace IBay.Controllers
             return Ok(updatedProduct);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public IActionResult Delete(int id)
         {
-            Product product = _context.DeleteProduct(id);
+            var product = context.DeleteProduct(id);
             if (product == null)
             {
                 return NotFound();
             }
             return Ok(product);
         }
-
-        
     }
 }

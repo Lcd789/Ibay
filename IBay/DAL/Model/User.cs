@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
 
 namespace DAL.Model
@@ -14,7 +7,6 @@ namespace DAL.Model
     public enum UserRole
     {
         StandardUser,
-        Banned,
         Admin
     }
 
@@ -45,7 +37,6 @@ namespace DAL.Model
         [DataType(DataType.Password)]
         public string UserPassword { get; set; }
 
-        // UserMoney is at least 0 and cannot be negative
         [Column(TypeName = "decimal(18,2)")]
         [DefaultValue(0)]
         public double UserMoney { get; set; }
@@ -65,6 +56,5 @@ namespace DAL.Model
         public DateTime CreationDate { get; set; }
 
         public DateTime? UpdatedDate { get; set; }
-
     }
 }
