@@ -5,7 +5,9 @@ VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IBay", "IBay\IBay.csproj", "{A32F1748-9BB9-4DB8-9A96-63DA3ACDFC18}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAL", "DAL\DAL.csproj", "{BA14A2B6-B991-4DF9-AE8E-01238B570CAC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAL", "DAL\DAL.csproj", "{BA14A2B6-B991-4DF9-AE8E-01238B570CAC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DALTests", "DALTests\DALTests.csproj", "{3470115F-8E8E-45C4-A785-A7926663ACDD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{BA14A2B6-B991-4DF9-AE8E-01238B570CAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA14A2B6-B991-4DF9-AE8E-01238B570CAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA14A2B6-B991-4DF9-AE8E-01238B570CAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3470115F-8E8E-45C4-A785-A7926663ACDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3470115F-8E8E-45C4-A785-A7926663ACDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3470115F-8E8E-45C4-A785-A7926663ACDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3470115F-8E8E-45C4-A785-A7926663ACDD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
