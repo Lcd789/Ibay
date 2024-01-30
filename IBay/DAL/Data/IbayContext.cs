@@ -20,11 +20,6 @@ namespace DAL.Data
                 .Build();
 
             var connectionString = configuration["DbConnection:connectionString"];
-            
-            //const string connectionString = "server=bc81bou7c6hqehj9n497-mysql.services.clever-cloud.com;" +
-            //                                "user=ukkodujekl2bm0ya;" +
-            //                                "password=0uT89hoAL5YM644TecQ7;" +
-            //                                "database=bc81bou7c6hqehj9n497\n";
                 
             var serverVersion = new MySqlServerVersion(new Version(8, 0, 34));
                 
