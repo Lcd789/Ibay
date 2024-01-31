@@ -7,6 +7,7 @@ namespace DAL.Data
 {
     public class IbayContext : DbContext, IIbayContext
     {
+        private IIbayContext _ibayContextImplementation;
         public DbSet<User> Users { get; set; }
         public DbSet<Product> Products { get; set; }
 
@@ -59,7 +60,12 @@ namespace DAL.Data
         {
             return Users.SingleOrDefault(u => u.UserId == userId)!;
         }
-
+        
+        public User GetUserByEmail(string userEmail)
+        {
+            return Users.SingleOrDefault(u => u.UserEmail == userEmail)!;
+        }
+        
         public User GetUserByPseudo(string userPseudo)
         {
             return Users.SingleOrDefault(u => u.UserPseudo == userPseudo)!;

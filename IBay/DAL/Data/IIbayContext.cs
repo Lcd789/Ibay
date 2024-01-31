@@ -7,6 +7,8 @@ namespace DAL.Data
         User CreateUser(string userPseudo, string userEmail, string userPassword );
 
         User DeleteUser(int id);
+        
+        User GetUserByEmail(string  userEmail);
 
         User UpdateUser(int userId, string userEmail, string userPseudo, string userPassword);
         
