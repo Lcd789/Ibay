@@ -9,6 +9,8 @@ namespace DAL.Data
         User DeleteUser(int id);
 
         User UpdateUser(int userId, string userEmail, string userPseudo, string userPassword);
+
+        IEnumerable<Product> GetProducts(string sortBy, int limit);
         
         Product GetProductById(int id);
 
@@ -27,5 +29,6 @@ namespace DAL.Data
         User BuyCart(int userId);
 
         IEnumerable<Product> GetProductsOnSale(int userId);
+        User UpdateUserMoney(int userId, double money);
     }
 }

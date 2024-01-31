@@ -16,7 +16,7 @@ namespace DAL.Model
         public int UserId { get; set; }
 
         [Required]
-        [MaxLength(50)]
+        [MaxLength(40)]
         [MinLength(3)]
         [RegularExpression(@"^[a-zA-Z0-9_-]+$")]
         [DataType(DataType.Text)]

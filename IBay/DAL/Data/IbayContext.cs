@@ -7,8 +7,12 @@ namespace DAL.Data
 {
     public class IbayContext : DbContext, IIbayContext
     {
-        public DbSet<User> Users { get; set; }
-        public DbSet<Product> Products { get; set; }
+        public IbayContext(DbContextOptions<IbayContext> options) : base(options)
+        {
+        }
+        public IbayContext() { }
+        public DbSet<User> Users { get; set; } = null!;
+        public DbSet<Product> Products { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -31,6 +35,12 @@ namespace DAL.Data
         
         public User CreateUser(string userPseudo, string userEmail, string userPassword)
         {
+            var existingUser = Users.FirstOrDefault(u => u.UserEmail == userEmail);
+            if (existingUser != null)
+            {
+                throw new InvalidOperationException("Email already in database");
+            }
+            
             var newUser = new User()
             {
                 UserPseudo = userPseudo,
@@ -71,6 +81,12 @@ namespace DAL.Data
             if (userToUpdate == null)
             {
                 return null!;
+            }
+            
+            var existingUser = Users.FirstOrDefault(u => u.UserEmail == userEmail);
+            if (existingUser != null)
+            {
+                throw new InvalidOperationException("Email already in database");
             }
 
             if (!userEmail.IsNullOrEmpty())
@@ -133,7 +149,7 @@ namespace DAL.Data
         
         public Product CreateProduct(int sellerId, string productName, string productDescription, double productPrice, int productStock)
         {
-            var seller = Products.FirstOrDefault(u => u.SellerId == sellerId);
+            var seller = Users.FirstOrDefault(u => u.UserId == sellerId);
             if (seller == null)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("Seller not found");
@@ -148,6 +164,7 @@ namespace DAL.Data
                 AddedTime = DateTime.Now,
                 UpdatedTime = null,
                 SellerId = sellerId,
+                Available = true
             };
 
             Products.Add(newProduct);
@@ -162,6 +179,26 @@ namespace DAL.Data
                 .WithMany(u => u.AddedProducts)
                 .HasForeignKey(p => p.SellerId)
                 .OnDelete(DeleteBehavior.Restrict);
+        }
+        
+        public IEnumerable<Product> GetProducts(string sortBy, int limit)
+        {
+            if (limit == null)
+            {
+                limit = 10;
+            }
+            IQueryable<Product> query = Products;
+
+            query = sortBy.ToLower() switch
+            {
+                "date" => query.OrderByDescending(p => p.AddedTime),
+                "type" => query.OrderBy(p => p.ProductType),
+                "name" => query.OrderBy(p => p.ProductName),
+                "price" => query.OrderBy(p => p.ProductPrice),
+                _ => query.OrderByDescending(p => p.AddedTime)
+            };
+
+            return query.Take(limit).ToList();
         }
         
         public Product GetProductById(int productId)
@@ -325,7 +362,7 @@ namespace DAL.Data
                 throw new System.ComponentModel.DataAnnotations.ValidationException("Not enough stock in cart");
             }
 
-            productToRemoveFromCart.ProductStock -= quantity;
+            productToRemoveFromCart.ProductStock += quantity;
 
             if (productToRemoveFromCart.ProductStock == 0)
             {
@@ -334,6 +371,33 @@ namespace DAL.Data
 
             SaveChanges();
             return userToRemoveProductFromCart;
+        }
+        
+        public User UpdateUserMoney(int userId, double money)
+        {
+            var userToPutMoney = Users.FirstOrDefault(u => u.UserId == userId);
+            if (userToPutMoney == null)
+            {
+                throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
+            }
+
+            userToPutMoney.UserMoney += money switch
+            {
+                0 => throw new System.ComponentModel.DataAnnotations.ValidationException(
+                    "You can't put 0 in this method"),
+                < 0 when userToPutMoney.UserMoney - money >= 0 => money,
+                < 0 => throw new System.ComponentModel.DataAnnotations.ValidationException("Not enough money"),
+                _ => money
+            };
+
+            if (userToPutMoney.UserMoney <= 0)
+            {
+                throw new System.ComponentModel.DataAnnotations.ValidationException("Not enough money");
+            }
+
+            SaveChanges();
+
+            return userToPutMoney;
         }
     }
 }

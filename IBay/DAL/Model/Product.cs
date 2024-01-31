@@ -40,5 +40,8 @@ namespace DAL.Model
 
         [Required]
         public User Seller { get; set; }
+        
+        [Required]
+        public string ProductType { get; set; }
     }
 }

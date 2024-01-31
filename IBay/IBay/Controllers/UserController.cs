@@ -47,5 +47,16 @@ namespace IBay.Controllers
             }
             return Ok(user);
         }
+        
+        [HttpPut("{id:int}/money/{money:double}")]
+        public IActionResult UpdateUserMoney(int id, double money)
+        {
+            var updatedUser = context.UpdateUserMoney(id, money);
+            if (updatedUser == null)
+            {
+                return NotFound();
+            }
+            return Ok(updatedUser);
+        }
     }
 }

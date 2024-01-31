@@ -25,6 +25,20 @@ namespace IBay.Controllers
             }
             return Ok(product);
         }
+        
+        [HttpGet()]
+        public IActionResult GetProducts(string sortBy, int limit)
+        {
+            var products = context.GetProducts(sortBy, limit);
+            if (products != null) 
+            { 
+                return Ok(products);
+            }
+            else 
+            { 
+                return NotFound();
+            }
+        }
 
         [HttpGet("user/{userid:int}/products")]
         public IActionResult GetProductsOnSale(int userId)
