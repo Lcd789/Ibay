@@ -4,6 +4,20 @@ using System.ComponentModel;
 
 namespace DAL.Model
 {
+    public enum ProductType
+    {
+        [Display(Name = "Electronics")]
+        Electronics,
+        [Display(Name = "Clothing")]
+        Clothing,
+        [Display(Name = "Furniture")]
+        Furniture,
+        [Display(Name = "Books")]
+        Books,
+        [Display(Name = "Other")]
+        Other
+    }
+
     public class Product
     {
         [Key]
@@ -16,6 +30,9 @@ namespace DAL.Model
         [Required]
         [MaxLength(1000)]
         public string ProductDescription { get; set; }
+
+        [Required]
+        public ProductType ProductType { get; set; }
 
         [Required]
         [Column(TypeName = "decimal(18,2)")]

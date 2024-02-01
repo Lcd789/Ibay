@@ -9,14 +9,21 @@ namespace IBay.Controllers
     public class ProductController(IIbayContext context) : ControllerBase
     {
         [HttpPost("{sellerId:int}")]
-        public IActionResult Create(int sellerId, string productName, string productDescription, double productPrice, int productStock)
+        public IActionResult Create(int sellerId, string productName, string productDescription, ProductType productType, double productPrice, int productStock)
         {
-            var newProduct = context.CreateProduct(sellerId, productName, productDescription, productPrice, productStock);
+            var newProduct = context.CreateProduct(sellerId, productName, productDescription, productType, productPrice, productStock);
             return Ok(newProduct);
         }
 
+        [HttpGet]
+        public IActionResult Get(SortCategory sortCategory, int limit)
+        {
+            var products = context.GetProducts(sortCategory, limit);
+            return Ok(products);
+        }
+
         [HttpGet("{id:int}")]
-        public IActionResult Get(int id)
+        public IActionResult GetById(int id)
         {
             var product = context.GetProductById(id);
             if (product == null)
@@ -40,7 +47,7 @@ namespace IBay.Controllers
         [HttpPut("{id:int}")]
         public IActionResult Update(int id, [FromBody] Product product)
         {
-            var updatedProduct = context.UpdateProduct(id, product.ProductName, product.ProductDescription, product.ProductPrice, product.ProductStock, product.Available) ;
+            var updatedProduct = context.UpdateProduct(id, product.ProductName, product.ProductDescription, product.ProductType, product.ProductPrice, product.ProductStock, product.Available);
             if (updatedProduct == null)
             {
                 return NotFound();

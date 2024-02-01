@@ -5,9 +5,16 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace DAL.Data
 {
+    public enum SortCategory
+    {
+        Date,
+        Type,
+        Name,
+        Price
+    }
+
     public class IbayContext : DbContext, IIbayContext
     {
-        private IIbayContext _ibayContextImplementation;
         public DbSet<User> Users { get; set; }
         public DbSet<Product> Products { get; set; }
 
@@ -102,7 +109,34 @@ namespace DAL.Data
             SaveChanges();
             return userToUpdate;
         }
-        
+
+        public User UpdateUserMoney(int userId, double money)
+        {
+            var userToPutMoney = Users.FirstOrDefault(u => u.UserId == userId);
+            if (userToPutMoney == null)
+            {
+                throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
+            }
+
+            userToPutMoney.UserMoney += money switch
+            {
+                0 => throw new System.ComponentModel.DataAnnotations.ValidationException(
+                    "You can't put 0 in this method"),
+                < 0 when userToPutMoney.UserMoney - money >= 0 => money,
+                < 0 => throw new System.ComponentModel.DataAnnotations.ValidationException("Not enough money"),
+                _ => money
+            };
+
+            if (userToPutMoney.UserMoney <= 0)
+            {
+                throw new System.ComponentModel.DataAnnotations.ValidationException("Not enough money");
+            }
+
+            SaveChanges();
+
+            return userToPutMoney;
+        }
+
         public User DeleteUser(int userId)
         {
             var userToDelete = Users.SingleOrDefault(u => u.UserId == userId);
@@ -136,8 +170,12 @@ namespace DAL.Data
 
             return userToChangeRole;
         }
-        
-        public Product CreateProduct(int sellerId, string productName, string productDescription, double productPrice, int productStock)
+
+
+        // PRODUCT
+
+
+        public Product CreateProduct(int sellerId, string productName, string productDescription, ProductType productType, double productPrice, int productStock)
         {
             var seller = Products.FirstOrDefault(u => u.SellerId == sellerId);
             if (seller == null)
@@ -149,6 +187,7 @@ namespace DAL.Data
             {
                 ProductName = productName,
                 ProductDescription = productDescription,
+                ProductType = productType,
                 ProductPrice = productPrice,
                 ProductStock = productStock,
                 AddedTime = DateTime.Now,
@@ -169,7 +208,7 @@ namespace DAL.Data
                 .HasForeignKey(p => p.SellerId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
-        
+
         public Product GetProductById(int productId)
         {
             return Products.SingleOrDefault(p => p.ProductId == productId)!;
@@ -180,7 +219,28 @@ namespace DAL.Data
             return Products.SingleOrDefault(p => p.ProductName == productName)!;
         }
 
-        public Product UpdateProduct(int productId, string productName, string productDescription, double? productPrice, int? productStock, bool? available)
+        
+
+        public IEnumerable<Product> GetProducts(SortCategory sortCategory, int limit=10)
+        {
+            if (limit.GetType() != typeof(int))
+            {
+                throw new System.ComponentModel.DataAnnotations.ValidationException("Limit must be an integer");
+            }
+            IQueryable<Product> query = Products;
+            query = sortCategory switch
+            {
+                SortCategory.Date => query.OrderByDescending(p => p.AddedTime),
+                SortCategory.Type => query.OrderBy(p => p.ProductType),
+                SortCategory.Name => query.OrderBy(p => p.ProductName),
+                SortCategory.Price => query.OrderBy(p => p.ProductPrice),
+                _ => query.OrderByDescending(p => p.AddedTime)
+            };
+
+            return query.Take(limit).ToList();
+        }
+
+        public Product UpdateProduct(int productId, string productName, string productDescription, ProductType productType, double? productPrice, int? productStock, bool? available)
         {
             var productToUpdate = Products.FirstOrDefault(p => p.ProductId == productId);
             if (productToUpdate == null)
@@ -195,6 +255,10 @@ namespace DAL.Data
             if (!productDescription.IsNullOrEmpty())
             {
                 productToUpdate.ProductDescription = productDescription;
+            }
+            if (productType != productToUpdate.ProductType)
+            {
+                productToUpdate.ProductType = productType;
             }
             if (productPrice != null)
             {
@@ -238,7 +302,11 @@ namespace DAL.Data
 
             return products;
         }
+
+
+        // CART
         
+
         public User BuyCart(int userId)
         {
             var userToBuyCart = Users.FirstOrDefault(u => u.UserId == userId);
