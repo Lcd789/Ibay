@@ -15,8 +15,15 @@ namespace IBay.Controllers
             return Ok(newUser);
         }
 
+        [HttpGet]
+        public IActionResult Get()
+        {
+            var users = context.GetUsers();
+            return Ok(users);
+        }
+
         [HttpGet("{id:int}")]
-        public IActionResult Get(int id)
+        public IActionResult GetById(int id)
         {
             var user = context.GetUserById(id);
             if (user == null)
@@ -24,6 +31,17 @@ namespace IBay.Controllers
                 return NotFound();
             }
             return Ok(user);
+        }
+
+        [HttpGet("{userId:int}/cart")]
+        public IActionResult GetCart(int userId)
+        {
+            var user = context.GetUserById(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            return Ok(user.UserCart);
         }
 
         [HttpPut("{id:int}")]

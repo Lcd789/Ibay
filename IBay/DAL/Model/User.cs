@@ -1,12 +1,20 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace DAL.Model
 {
     public enum UserRole
     {
+        [Display(Name = "Standard User")]
+        [Description("Standard User")]
         StandardUser,
+
+        [Display(Name = "Admin")]
+        [Description("Admin")]
         Admin
     }
 
@@ -15,26 +23,22 @@ namespace DAL.Model
         [Key]
         public int UserId { get; set; }
 
-        [Required]
-        [MaxLength(50)]
-        [MinLength(3)]
+
         [RegularExpression(@"^[a-zA-Z0-9_-]+$")]
         [DataType(DataType.Text)]
         [Column(TypeName = "varchar(50)")]
+        [Required, MaxLength(50), MinLength(3)]
         public string UserPseudo { get; set; }
 
-        [Required]
-        [MaxLength(80)]
-        [MinLength(3)]
+
         [DataType(DataType.EmailAddress)]
         [EmailAddress]
+        [Required, MaxLength(80), MinLength(3)]
         public string UserEmail { get; set; }
 
-        [Required]
-        [MaxLength(255)]
-        [MinLength(8)]
         [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,255}$")]
         [DataType(DataType.Password)]
+        [Required, MaxLength(255), MinLength(8)]
         public string UserPassword { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
@@ -46,11 +50,13 @@ namespace DAL.Model
         [DefaultValue(UserRole.StandardUser)]
         public UserRole UserRole { get; set; }
 
-        public List<Product> AddedProducts { get; set; }
+        [InverseProperty("CartOwner")]
+        // Le panier de l'utilisateur
+        public virtual List<Product> UserCart { get; set; }
 
-        public List<Product> UserCart { get; set; }
-
-        public List<Product> UserProducts { get; set; }
+        [InverseProperty("Seller")]
+        // Les produits en vente par l'utilisateur
+        public virtual List<Product> UserProducts { get; set; }
 
         [Required]
         public DateTime CreationDate { get; set; }

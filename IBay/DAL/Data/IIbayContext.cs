@@ -3,6 +3,7 @@ namespace DAL.Data
 {
     public interface IIbayContext
     {
+        IEnumerable<User> GetUsers();
         User GetUserById(int id);
         User CreateUser(string userPseudo, string userEmail, string userPassword );
 

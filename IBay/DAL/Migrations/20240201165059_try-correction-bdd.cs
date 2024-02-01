@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class trycorrectionbdd : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -48,51 +48,42 @@ namespace DAL.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ProductDescription = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    ProductType = table.Column<int>(type: "int", nullable: false),
                     ProductPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     ProductStock = table.Column<int>(type: "int", nullable: false),
                     Available = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     AddedTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdatedTime = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     SellerId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: true),
-                    UserId1 = table.Column<int>(type: "int", nullable: true)
+                    CartOwnerId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Products", x => x.ProductId);
                     table.ForeignKey(
+                        name: "FK_Products_Users_CartOwnerId",
+                        column: x => x.CartOwnerId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "FK_Products_Users_SellerId",
                         column: x => x.SellerId,
                         principalTable: "Users",
                         principalColumn: "UserId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Products_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "UserId");
-                    table.ForeignKey(
-                        name: "FK_Products_Users_UserId1",
-                        column: x => x.UserId1,
-                        principalTable: "Users",
-                        principalColumn: "UserId");
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_CartOwnerId",
+                table: "Products",
+                column: "CartOwnerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Products_SellerId",
                 table: "Products",
                 column: "SellerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Products_UserId",
-                table: "Products",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Products_UserId1",
-                table: "Products",
-                column: "UserId1");
         }
 
         /// <inheritdoc />

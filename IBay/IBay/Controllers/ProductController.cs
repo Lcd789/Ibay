@@ -9,6 +9,21 @@ namespace IBay.Controllers
     public class ProductController(IIbayContext context) : ControllerBase
     {
         [HttpPost("{sellerId:int}")]
+        /// <summary> Creates a product </summary>
+        /// <param name="sellerId"> The id of the seller </param>
+        /// <param name="productName"> The name of the product </param>
+        /// <param name="productDescription"> The description of the product </param>
+        /// <param name="productType"> The type of the product </param>
+        /// <param name="productPrice"> The price of the product </param>
+        /// <param name="productStock"> The stock of the product </param>
+        /// <returns> The created product </returns>
+        /// <response code="200"> Returns the created product </response>
+        /// <response code="400"> If the product is not valid </response>
+        /// <response code="401"> If the user is not authenticated </response>
+        /// <response code="403"> If the user is not authorized </response>
+        /// <response code="404"> If the seller is not found </response>
+        /// <response code="409"> If the product already exists </response>
+
         public IActionResult Create(int sellerId, string productName, string productDescription, ProductType productType, double productPrice, int productStock)
         {
             var newProduct = context.CreateProduct(sellerId, productName, productDescription, productType, productPrice, productStock);
@@ -16,6 +31,15 @@ namespace IBay.Controllers
         }
 
         [HttpGet]
+        /// <summary> Gets all the products </summary>
+        /// <param name="sortCategory"> The category to sort the products by, 0 = Electronic, 1 = Clothing, 2 = Furniture, 3 = Books, 4 = Other </param>
+        /// <param name="limit"> The maximum number of products to return </param>
+        /// <returns> The products </returns>
+        /// <response code="200"> Returns the products </response>
+        /// <response code="400"> If the sort category is not valid </response>
+        /// <response code="401"> If the user is not authenticated </response>
+        /// <response code="403"> If the user is not authorized </response>
+        /// <response code="404"> If the products are not found </response>
         public IActionResult Get(SortCategory sortCategory, int limit)
         {
             var products = context.GetProducts(sortCategory, limit);
@@ -23,6 +47,14 @@ namespace IBay.Controllers
         }
 
         [HttpGet("{id:int}")]
+        /// <summary> Gets a product by its id </summary>
+        /// <param name="id"> The id of the product </param>
+        /// <returns> The product </returns>
+        /// <response code="200"> Returns the product </response>
+        /// <response code="404"> If the product is not found </response>
+        /// <response code="400"> If the product is not valid </response>
+        /// <response code="401"> If the user is not authenticated </response>
+        /// <response code="403"> If the user is not authorized </response>
         public IActionResult GetById(int id)
         {
             var product = context.GetProductById(id);
@@ -34,6 +66,12 @@ namespace IBay.Controllers
         }
 
         [HttpGet("user/{userid:int}/products")]
+        /// <summary> Gets all the products of a user </summary>
+        /// <param name="userId"> The id of the user </param>
+        /// <returns> The products of the user </returns>
+        /// <response code="200"> Returns the products of the user </response>
+        /// <response code="404"> If the user is not found </response>
+        /// <response code="400"> If the user is not valid </response>
         public IActionResult GetProductsOnSale(int userId)
         {
             var product = context.GetProductsOnSale(userId).ToList();
@@ -45,6 +83,13 @@ namespace IBay.Controllers
         }
 
         [HttpPut("{id:int}")]
+        /// <summary> Updates a product </summary>
+        /// <param name="id"> The id of the product to update </param>
+        /// <param name="product"> The product to update </param>
+        /// <returns> The updated product </returns>
+        /// <response code="200"> Returns the updated product </response>
+        /// <response code="404"> If the product is not found </response>
+        /// <response code="400"> If the product is not valid </response>
         public IActionResult Update(int id, [FromBody] Product product)
         {
             var updatedProduct = context.UpdateProduct(id, product.ProductName, product.ProductDescription, product.ProductType, product.ProductPrice, product.ProductStock, product.Available);

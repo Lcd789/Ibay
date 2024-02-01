@@ -36,7 +36,22 @@ namespace DAL.Data
                 .EnableSensitiveDataLogging()
                 .EnableDetailedErrors();
         }
-        
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Product>()
+                .HasOne(p => p.CartOwner)
+                .WithMany(u => u.UserCart)
+                .HasForeignKey(p => p.CartOwnerId)
+                .OnDelete(DeleteBehavior.Cascade); // Suppression en cascade lorsque l'utilisateur est supprimé
+
+            modelBuilder.Entity<Product>()
+                .HasOne(p => p.Seller)
+                .WithMany(u => u.UserProducts)
+                .HasForeignKey(p => p.SellerId)
+                .OnDelete(DeleteBehavior.Cascade); // Suppression en cascade lorsque l'utilisateur est supprimé
+        }
+
         public User CreateUser(string userPseudo, string userEmail, string userPassword)
         {
             var newUser = new User()
@@ -63,6 +78,11 @@ namespace DAL.Data
             return newUser;
         }
 
+        public IEnumerable<User> GetUsers()
+        {
+            return Users.ToList();
+        }
+
         public User GetUserById(int userId)
         {
             return Users.SingleOrDefault(u => u.UserId == userId)!;
@@ -76,6 +96,19 @@ namespace DAL.Data
         public User GetUserByPseudo(string userPseudo)
         {
             return Users.SingleOrDefault(u => u.UserPseudo == userPseudo)!;
+        }
+
+        public IEnumerable<Product> GetProductsOnSale(int userId)
+        {
+            var userToGetProductsOnSale = Users.FirstOrDefault(u => u.UserId == userId);
+            if (userToGetProductsOnSale == null)
+            {
+                throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
+            }
+
+            var products = Products.Where(p => p.SellerId == userId).ToList();
+
+            return products;
         }
 
         public User UpdateUser(int userId, string userEmail, string userPseudo, string userPassword)
@@ -177,7 +210,7 @@ namespace DAL.Data
 
         public Product CreateProduct(int sellerId, string productName, string productDescription, ProductType productType, double productPrice, int productStock)
         {
-            var seller = Products.FirstOrDefault(u => u.SellerId == sellerId);
+            var seller = Users.FirstOrDefault(u => u.UserId == sellerId);
             if (seller == null)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("Seller not found");
@@ -194,20 +227,13 @@ namespace DAL.Data
                 UpdatedTime = null,
                 SellerId = sellerId,
             };
-
+            // Vérifier que le produit n'existe pas déjà
             Products.Add(newProduct);
             SaveChanges();
             return newProduct;
         }
         
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Product>()
-                .HasOne(p => p.Seller)
-                .WithMany(u => u.AddedProducts)
-                .HasForeignKey(p => p.SellerId)
-                .OnDelete(DeleteBehavior.Restrict);
-        }
+        
 
         public Product GetProductById(int productId)
         {
@@ -290,18 +316,7 @@ namespace DAL.Data
             return productToDelete;
         }
         
-        public IEnumerable<Product> GetProductsOnSale(int userId)
-        {
-            var userToGetProductsOnSale = Users.FirstOrDefault(u => u.UserId == userId);
-            if (userToGetProductsOnSale == null)
-            {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
-            }
-
-            var products = Products.Where(p => p.SellerId == userId).ToList();
-
-            return products;
-        }
+        
 
 
         // CART
@@ -408,6 +423,17 @@ namespace DAL.Data
 
             SaveChanges();
             return userToRemoveProductFromCart;
+        }
+
+        public IEnumerable<Product> GetCart(int userId)
+        {
+            var userToGetCart = Users.FirstOrDefault(u => u.UserId == userId);
+            if (userToGetCart == null)
+            {
+                throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
+            }
+
+            return userToGetCart.UserCart;
         }
     }
 }

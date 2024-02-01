@@ -1,20 +1,31 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DAL.Model
 {
     public enum ProductType
     {
         [Display(Name = "Electronics")]
+        [Description("Electronics")]
         Electronics,
+
         [Display(Name = "Clothing")]
+        [Description("Clothing")]
         Clothing,
+
         [Display(Name = "Furniture")]
+        [Description("Furniture")]
         Furniture,
+
         [Display(Name = "Books")]
+        [Description("Books")]
         Books,
+
         [Display(Name = "Other")]
+        [Description("Other")]
         Other
     }
 
@@ -23,15 +34,15 @@ namespace DAL.Model
         [Key]
         public int ProductId { get; set; }
 
-        [Required]
-        [MaxLength(255)]
+        [Required, MaxLength(255)]
         public string ProductName { get; set; }
 
-        [Required]
-        [MaxLength(1000)]
+        [Required, MaxLength(1000)]
         public string ProductDescription { get; set; }
 
         [Required]
+        [EnumDataType(typeof(ProductType))]
+        [DefaultValue(ProductType.Other)]
         public ProductType ProductType { get; set; }
 
         [Required]
@@ -51,11 +62,12 @@ namespace DAL.Model
 
         public DateTime? UpdatedTime { get; set; }
 
-        [Required]
         [ForeignKey("Seller")]
         public int SellerId { get; set; }
+        public virtual User Seller { get; set; }
 
-        [Required]
-        public User Seller { get; set; }
+        [ForeignKey("CartOwner")]
+        public int CartOwnerId { get; set; }
+        public virtual User CartOwner { get; set; }
     }
 }
