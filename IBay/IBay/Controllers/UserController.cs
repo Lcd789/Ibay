@@ -33,6 +33,8 @@ namespace IBay.Controllers
             return Ok(user);
         }
 
+
+        /*
         [HttpGet("{userId:int}/cart")]
         public IActionResult GetCart(int userId)
         {
@@ -41,8 +43,9 @@ namespace IBay.Controllers
             {
                 return NotFound();
             }
-            return Ok(user.UserCart);
-        }
+            var cart = user.UserCart;
+            return Ok(cart);
+        }*/
 
         [HttpPut("{id:int}")]
         public IActionResult Update(int id, [FromBody] User user)

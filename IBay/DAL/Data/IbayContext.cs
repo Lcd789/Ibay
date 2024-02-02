@@ -18,6 +18,8 @@ namespace DAL.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Product> Products { get; set; }
 
+        public DbSet<Cart> Carts { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (optionsBuilder.IsConfigured) return;
@@ -36,21 +38,7 @@ namespace DAL.Data
                 .EnableSensitiveDataLogging()
                 .EnableDetailedErrors();
         }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Product>()
-                .HasOne(p => p.CartOwner)
-                .WithMany(u => u.UserCart)
-                .HasForeignKey(p => p.CartOwnerId)
-                .OnDelete(DeleteBehavior.Cascade); // Suppression en cascade lorsque l'utilisateur est supprimé
-
-            modelBuilder.Entity<Product>()
-                .HasOne(p => p.Seller)
-                .WithMany(u => u.UserProducts)
-                .HasForeignKey(p => p.SellerId)
-                .OnDelete(DeleteBehavior.Cascade); // Suppression en cascade lorsque l'utilisateur est supprimé
-        }
+        
 
         public User CreateUser(string userPseudo, string userEmail, string userPassword)
         {
@@ -61,11 +49,8 @@ namespace DAL.Data
                 UserPassword = userPassword,
                 UserMoney = 0,
                 UserRole = UserRole.StandardUser,
-                UserCart = new List<Product>(),
-                UserProducts = new List<Product>(),
-                CreationDate = DateTime.Now,
                 UpdatedDate = null,
-
+                CreationDate = DateTime.Now,
             };
 
             var errorMessage = newUser.ValidateUser();
@@ -98,6 +83,11 @@ namespace DAL.Data
             return Users.SingleOrDefault(u => u.UserPseudo == userPseudo)!;
         }
 
+        public User GetUserCart(int userId)
+        {
+            return Users.SingleOrDefault(u => u.UserId == userId)!;
+        }
+        /*
         public IEnumerable<Product> GetProductsOnSale(int userId)
         {
             var userToGetProductsOnSale = Users.FirstOrDefault(u => u.UserId == userId);
@@ -109,7 +99,7 @@ namespace DAL.Data
             var products = Products.Where(p => p.SellerId == userId).ToList();
 
             return products;
-        }
+        }*/
 
         public User UpdateUser(int userId, string userEmail, string userPseudo, string userPassword)
         {
@@ -225,7 +215,7 @@ namespace DAL.Data
                 ProductStock = productStock,
                 AddedTime = DateTime.Now,
                 UpdatedTime = null,
-                SellerId = sellerId,
+                FK_UserId = sellerId
             };
             // Vérifier que le produit n'existe pas déjà
             Products.Add(newProduct);
@@ -245,9 +235,13 @@ namespace DAL.Data
             return Products.SingleOrDefault(p => p.ProductName == productName)!;
         }
 
+        public IEnumerable<Product> GetProducts()
+        {
+            return Products.ToList();
+        }
         
 
-        public IEnumerable<Product> GetProducts(SortCategory sortCategory, int limit=10)
+        public IEnumerable<Product> GetProductSortedBy(SortCategory sortCategory, int limit)
         {
             if (limit.GetType() != typeof(int))
             {
@@ -321,40 +315,36 @@ namespace DAL.Data
 
         // CART
         
+        //TODO: Refaire les méthodes de cart
 
-        public User BuyCart(int userId)
+        // GetCart
+
+        public IEnumerable<Cart> GetCart(int userId)
         {
-            var userToBuyCart = Users.FirstOrDefault(u => u.UserId == userId);
-            if (userToBuyCart == null)
+            var userToGetCart = Users.FirstOrDefault(u => u.UserId == userId);
+            if (userToGetCart == null)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
             }
 
-            var cartToBuy = userToBuyCart.UserCart;
-
-            if (cartToBuy.Count == 0)
+            var cart = Carts.Where(c => c.FK_UserId == userId).ToList();
+            if (cart.Count == 0)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("Cart is empty");
             }
 
-            if (cartToBuy.Any(product => !product.Available))
-            {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("Product not available");
-            }
-
-            var totalPrice = cartToBuy.Sum(p => p.ProductPrice);
-
-            if (userToBuyCart.UserMoney < totalPrice)
-            {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("Not enough money");
-            }
-
-            userToBuyCart.UserMoney -= totalPrice;
-            cartToBuy.Clear();
-            SaveChanges();
-            return userToBuyCart;
+            return cart;
         }
-        
+
+
+        // AddProductToCart
+        // Un User n'a qu'un Cart, si le cart n'existe pas, on le crée
+        // Dans Cart, on a une colonne pour les Produits et une colonne pour les quantités
+        // Si un Product est déjà dans le Cart, on ajoute la quantité demandée à la quantité existante
+        // Si un Product n'est pas dans le Cart, on l'ajoute avec la quantité demandée
+        // User n'a pas de relation avec Cart, mais Cart a une relation avec User
+        // Cart a une relation avec Product
+
         public User AddProductToCart(int userId, int productId, int quantity)
         {
             var userToAddProductToCart = Users.FirstOrDefault(u => u.UserId == userId);
@@ -369,27 +359,78 @@ namespace DAL.Data
                 throw new System.ComponentModel.DataAnnotations.ValidationException("Product not found");
             }
 
-            if (!productToAddToCart.Available)
-            {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("Product not available");
-            }
-
             if (quantity <= 0)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("Quantity must be positive");
             }
 
-            if (productToAddToCart.ProductStock < quantity)
+            if (productToAddToCart.ProductStock <= quantity)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("Not enough stock");
             }
 
-            userToAddProductToCart.UserCart.Add(productToAddToCart);
-            productToAddToCart.ProductStock -= quantity;
+            var existingCart = Carts.FirstOrDefault(c => c.FK_UserId == userId);
+            if(existingCart != null)
+            {
+                existingCart.Quantity += quantity;
+            }
+            else
+            {
+                var newCart = new Cart()
+                {
+                    FK_ProductId = productId,
+                    FK_UserId = userId,
+                    Quantity = quantity
+                };
+                
+                Carts.Add(newCart);
+            }
+
             SaveChanges();
             return userToAddProductToCart;
+            // 2 cas:
+            // 1. Le produit est déjà dans le panier
+            var productInCart = Carts.FirstOrDefault(c => c.FK_UserId == userId && c.FK_ProductId == productId);
+            Console.WriteLine();
+            Console.WriteLine("#################################################################################");
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine(productInCart);
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("#################################################################################");
+            Console.WriteLine();
+            /*
+            if (productInCart != null)
+            {
+                productInCart.Quantity += quantity;
+                SaveChanges();
+                return userToAddProductToCart;
+            }
+            // 2. Le produit n'est pas dans le panier
+            var cart = new Cart()
+            {
+                FK_UserId = userId,
+                User = userToAddProductToCart,
+                FK_ProductId = productId,
+                Product = productToAddToCart,
+                Quantity = quantity
+            };
+            Carts.Add(cart);
+            SaveChanges();
+            return userToAddProductToCart;*/
         }
-        
+
+        // RemoveProductFromCart
+        // Si le produit n'est pas dans le panier, erreur 404
+        // Si la quantité demandée est supérieure à la quantité dans le panier, erreur 400
+        // Si la quantité demandée est négative, erreur 400
+        // Si la quantité demandée est égale à la quantité dans le panier, on retire le produit du panier
+        // Si la quantité demandée est inférieure à la quantité dans le panier, on retire la quantité demandée de la quantité dans le panier
         public User RemoveProductFromCart(int userId, int productId, int quantity)
         {
             var userToRemoveProductFromCart = Users.FirstOrDefault(u => u.UserId == userId);
@@ -398,10 +439,10 @@ namespace DAL.Data
                 throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
             }
 
-            var productToRemoveFromCart = userToRemoveProductFromCart.UserCart.FirstOrDefault(p => p.ProductId == productId);
+            var productToRemoveFromCart = Products.FirstOrDefault(p => p.ProductId == productId);
             if (productToRemoveFromCart == null)
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("Product not found in cart");
+                throw new System.ComponentModel.DataAnnotations.ValidationException("Product not found");
             }
 
             if (quantity <= 0)
@@ -409,31 +450,104 @@ namespace DAL.Data
                 throw new System.ComponentModel.DataAnnotations.ValidationException("Quantity must be positive");
             }
 
-            if (productToRemoveFromCart.ProductStock < quantity)
+            var productInCart = Carts.FirstOrDefault(c => c.FK_UserId == userId && c.FK_ProductId == productId);
+            if (productInCart == null)
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("Not enough stock in cart");
+                throw new System.ComponentModel.DataAnnotations.ValidationException("Product not in cart");
             }
 
-            productToRemoveFromCart.ProductStock -= quantity;
-
-            if (productToRemoveFromCart.ProductStock == 0)
+            if (quantity > productInCart.Quantity)
             {
-                userToRemoveProductFromCart.UserCart.Remove(productToRemoveFromCart);
+                throw new System.ComponentModel.DataAnnotations.ValidationException("Quantity in cart is less than quantity to remove");
             }
 
+            if (quantity == productInCart.Quantity)
+            {
+                Carts.Remove(productInCart);
+                SaveChanges();
+                return userToRemoveProductFromCart;
+            }
+
+            productInCart.Quantity -= quantity;
             SaveChanges();
             return userToRemoveProductFromCart;
         }
 
-        public IEnumerable<Product> GetCart(int userId)
+        // BuyCart
+        // Si le User n'existe pas, erreur 404
+        // Si le panier est vide, erreur 400
+        // On calcule le prix total du panier
+        // Si le User n'a pas assez d'argent, erreur 400
+        // On retire le prix total du panier de l'argent du User
+        // On vide le panier
+        public User BuyCart(int userId)
         {
-            var userToGetCart = Users.FirstOrDefault(u => u.UserId == userId);
-            if (userToGetCart == null)
+            User userToBuyCart = Users.FirstOrDefault(u => u.UserId == userId);
+            if (userToBuyCart == null)
+            {
+                throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
+            }
+            // On récupère le panier du User
+            var cart = Carts.Where(c => c.FK_UserId == userId).ToList();
+            if (cart.Count == 0)
+            {
+                throw new System.ComponentModel.DataAnnotations.ValidationException("Cart is empty");
+            }
+            // On calcule le prix total du panier
+            double totalPrice = 0;
+            foreach (var product in cart)
+            {
+                totalPrice += product.Product.ProductPrice * product.Quantity;
+            }
+            // Si le User n'a pas assez d'argent, erreur 400
+            if (userToBuyCart.UserMoney < totalPrice)
+            {
+                throw new System.ComponentModel.DataAnnotations.ValidationException("Not enough money");
+            }
+            // On retire le prix total du panier de l'argent du User
+            userToBuyCart.UserMoney -= totalPrice;
+            // On vide le panier
+            Carts.RemoveRange(cart);
+            SaveChanges();
+            return userToBuyCart;
+        }
+
+
+
+
+        
+        /*
+        public User BuyCart(int userId)
+        {
+            var userToBuyCart = Users.FirstOrDefault(u => u.UserId == userId);
+            if (userToBuyCart == null)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
             }
 
-            return userToGetCart.UserCart;
-        }
+            var cart = userToBuyCart.UserCart;
+            if (cart.Items.Count == 0)
+            {
+                throw new System.ComponentModel.DataAnnotations.ValidationException("Cart is empty");
+            }
+
+            double totalPrice = 0;
+            foreach (var product in cart.Items)
+            {
+                totalPrice += product.Product.ProductPrice;
+            }
+
+            if (userToBuyCart.UserMoney < totalPrice)
+            {
+                throw new System.ComponentModel.DataAnnotations.ValidationException("Not enough money");
+            }
+
+            userToBuyCart.UserMoney -= totalPrice;
+            cart.Items.Clear();
+            SaveChanges();
+            return userToBuyCart;
+        }*/
+
+
     }
 }

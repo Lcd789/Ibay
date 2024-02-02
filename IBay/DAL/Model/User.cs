@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 
 namespace DAL.Model
 {
@@ -49,14 +48,6 @@ namespace DAL.Model
         [EnumDataType(typeof(UserRole))]
         [DefaultValue(UserRole.StandardUser)]
         public UserRole UserRole { get; set; }
-
-        [InverseProperty("CartOwner")]
-        // Le panier de l'utilisateur
-        public virtual List<Product> UserCart { get; set; }
-
-        [InverseProperty("Seller")]
-        // Les produits en vente par l'utilisateur
-        public virtual List<Product> UserProducts { get; set; }
 
         [Required]
         public DateTime CreationDate { get; set; }

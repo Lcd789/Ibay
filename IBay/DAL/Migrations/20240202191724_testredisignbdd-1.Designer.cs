@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(IbayContext))]
-    [Migration("20240201165059_try-correction-bdd")]
-    partial class trycorrectionbdd
+    [Migration("20240202191724_testredisignbdd-1")]
+    partial class testredisignbdd1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,6 +21,30 @@ namespace DAL.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            modelBuilder.Entity("DAL.Model.Cart", b =>
+                {
+                    b.Property<int>("CartId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("FK_ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FK_UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("CartId");
+
+                    b.HasIndex("FK_ProductId");
+
+                    b.HasIndex("FK_UserId");
+
+                    b.ToTable("Carts");
+                });
 
             modelBuilder.Entity("DAL.Model.Product", b =>
                 {
@@ -34,7 +58,7 @@ namespace DAL.Migrations
                     b.Property<bool>("Available")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<int>("CartOwnerId")
+                    b.Property<int>("FK_UserId")
                         .HasColumnType("int");
 
                     b.Property<string>("ProductDescription")
@@ -56,17 +80,12 @@ namespace DAL.Migrations
                     b.Property<int>("ProductType")
                         .HasColumnType("int");
 
-                    b.Property<int>("SellerId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("UpdatedTime")
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("ProductId");
 
-                    b.HasIndex("CartOwnerId");
-
-                    b.HasIndex("SellerId");
+                    b.HasIndex("FK_UserId");
 
                     b.ToTable("Products");
                 });
@@ -109,30 +128,34 @@ namespace DAL.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("DAL.Model.Product", b =>
+            modelBuilder.Entity("DAL.Model.Cart", b =>
                 {
-                    b.HasOne("DAL.Model.User", "CartOwner")
-                        .WithMany("UserCart")
-                        .HasForeignKey("CartOwnerId")
+                    b.HasOne("DAL.Model.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("FK_ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DAL.Model.User", "Seller")
-                        .WithMany("UserProducts")
-                        .HasForeignKey("SellerId")
+                    b.HasOne("DAL.Model.User", "User")
+                        .WithMany()
+                        .HasForeignKey("FK_UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("CartOwner");
+                    b.Navigation("Product");
 
-                    b.Navigation("Seller");
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("DAL.Model.User", b =>
+            modelBuilder.Entity("DAL.Model.Product", b =>
                 {
-                    b.Navigation("UserCart");
+                    b.HasOne("DAL.Model.User", "Seller")
+                        .WithMany()
+                        .HasForeignKey("FK_UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("UserProducts");
+                    b.Navigation("Seller");
                 });
 #pragma warning restore 612, 618
         }

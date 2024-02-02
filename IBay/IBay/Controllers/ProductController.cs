@@ -32,6 +32,20 @@ namespace IBay.Controllers
 
         [HttpGet]
         /// <summary> Gets all the products </summary>
+        /// <returns> The products </returns>
+        /// <response code="200"> Returns the products </response>
+        /// <response code="401"> If the user is not authenticated </response>
+        /// <response code="403"> If the user is not authorized </response>
+        /// <response code="404"> If the products are not found </response>
+        public IActionResult Get()
+        {
+            var products = context.GetProducts();
+            return Ok(products);
+        }
+
+
+        [HttpGet("/sort")]
+        /// <summary> Gets all the products </summary>
         /// <param name="sortCategory"> The category to sort the products by, 0 = Electronic, 1 = Clothing, 2 = Furniture, 3 = Books, 4 = Other </param>
         /// <param name="limit"> The maximum number of products to return </param>
         /// <returns> The products </returns>
@@ -42,7 +56,7 @@ namespace IBay.Controllers
         /// <response code="404"> If the products are not found </response>
         public IActionResult Get(SortCategory sortCategory, int limit)
         {
-            var products = context.GetProducts(sortCategory, limit);
+            var products = context.GetProductSortedBy(sortCategory, limit);
             return Ok(products);
         }
 
@@ -64,7 +78,7 @@ namespace IBay.Controllers
             }
             return Ok(product);
         }
-
+        /*
         [HttpGet("user/{userid:int}/products")]
         /// <summary> Gets all the products of a user </summary>
         /// <param name="userId"> The id of the user </param>
@@ -80,7 +94,7 @@ namespace IBay.Controllers
                 return NotFound();
             }
             return Ok(product);
-        }
+        }*/
 
         [HttpPut("{id:int}")]
         /// <summary> Updates a product </summary>

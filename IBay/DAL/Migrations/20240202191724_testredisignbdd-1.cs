@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class trycorrectionbdd : Migration
+    public partial class testredisignbdd1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -54,21 +54,42 @@ namespace DAL.Migrations
                     Available = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     AddedTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdatedTime = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    SellerId = table.Column<int>(type: "int", nullable: false),
-                    CartOwnerId = table.Column<int>(type: "int", nullable: false)
+                    FK_UserId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Products", x => x.ProductId);
                     table.ForeignKey(
-                        name: "FK_Products_Users_CartOwnerId",
-                        column: x => x.CartOwnerId,
+                        name: "FK_Products_Users_FK_UserId",
+                        column: x => x.FK_UserId,
                         principalTable: "Users",
                         principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Carts",
+                columns: table => new
+                {
+                    CartId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    FK_ProductId = table.Column<int>(type: "int", nullable: false),
+                    FK_UserId = table.Column<int>(type: "int", nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Carts", x => x.CartId);
                     table.ForeignKey(
-                        name: "FK_Products_Users_SellerId",
-                        column: x => x.SellerId,
+                        name: "FK_Carts_Products_FK_ProductId",
+                        column: x => x.FK_ProductId,
+                        principalTable: "Products",
+                        principalColumn: "ProductId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Carts_Users_FK_UserId",
+                        column: x => x.FK_UserId,
                         principalTable: "Users",
                         principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
@@ -76,19 +97,27 @@ namespace DAL.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Products_CartOwnerId",
-                table: "Products",
-                column: "CartOwnerId");
+                name: "IX_Carts_FK_ProductId",
+                table: "Carts",
+                column: "FK_ProductId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Products_SellerId",
+                name: "IX_Carts_FK_UserId",
+                table: "Carts",
+                column: "FK_UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_FK_UserId",
                 table: "Products",
-                column: "SellerId");
+                column: "FK_UserId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Carts");
+
             migrationBuilder.DropTable(
                 name: "Products");
 

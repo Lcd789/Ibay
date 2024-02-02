@@ -7,86 +7,43 @@ namespace IBay.Controllers
     [Route("api/[controller]")]
     public class CartController(IIbayContext context) : ControllerBase
     {
-        [HttpPost("{id:int}")]
-        /// <summary> Achat du panier du User </summary>
-        /// <param name="id"> Id du User </param>
-        /// <returns> Le User avec le panier acheté </returns>
-        /// <response code="200"> Le User avec le panier acheté </response>
-        /// <response code="400"> Le panier du User est vide </response>
-        /// <response code="400"> Le User n'a pas assez d'argent </response>
-        /// <response code="404"> Le User n'existe pas </response>
-        /// <response code="404"> Le produit n'existe pas </response>
-        /// <response code="404"> Le Seller n'existe pas </response>
-        /// <response code="404"> Le produit n'est pas disponible </response>
-        public IActionResult BuyCart(int id)
+        [HttpPut("{userId:int}")]
+        public IActionResult BuyCart(int userId)
         {
-            var user = context.BuyCart(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-            return Ok(user);
+            var cart = context.BuyCart(userId);
+            return Ok(cart);
         }
 
-        [HttpPut("{userId:int}")]
-        /// <summary> Ajoute la quantité demandée du produit au panier du User </summary>
-        /// <param name="userId"> Id du User </param>
-        /// <param name="productId"> Id du produit </param>
-        /// <param name="quantity"> Quantité à ajouter </param>
-        /// <returns> Le User avec le produit ajouté au panier </returns>
-        /// <response code="200"> Le User avec le produit ajouté au panier </response>
-        /// <response code="400"> La quantité demandée est supérieure à la quantité disponible </response>
-        /// <response code="400"> La quantité demandée est négative </response>
-        /// <response code="400"> Le produit n'est pas disponible </response>
-        /// <response code="404"> Le User n'existe pas </response>
-        /// <response code="404"> Le produit n'existe pas </response>
+        [HttpPost("{userId:int}/{productId:int}/{quantity:int}")]
+        /// <summary> Adds a product to the cart </summary>
+        /// <param name="userId"> The id of the user </param>
+        /// <param name="productId"> The id of the product </param>
+        /// <param name="quantity"> The quantity of the product </param>
+        /// <returns> The updated cart </returns>
+        /// <response code="200"> Returns the updated cart </response>
+        /// <response code="400"> If the product is not valid </response>
+        /// <response code="401"> If the user is not authenticated </response>
+        /// <response code="403"> If the user is not authorized </response>
+        /// <response code="404"> If the user or the product is not found </response>
+        /// <response code="409"> If the product is not available </response>
         public IActionResult AddProductToCart(int userId, int productId, int quantity)
         {
-            var user = context.AddProductToCart(userId, productId, quantity);
-            if (user == null)
-            {
-                return NotFound();
-            }
-            return Ok(user);
+            var cart = context.AddProductToCart(userId, productId, quantity);
+            return Ok(cart);
         }
 
-        [HttpDelete("{userId:int}")]
-        /// <summary> "Retire la quantité demandée du produit du panier du User" </summary>
-        /// <param name="userId"> Id du User </param>
-        /// <param name="productId"> Id du produit </param>
-        /// <param name="quantity"> Quantité à retirer </param>
-        /// <returns> Le User avec le produit retiré du panier </returns>
-        /// <response code="200"> Le User avec le produit retiré du panier </response>
-        /// <response code="400"> La quantité demandée est supérieure à la quantité dans le panier </response>
-        /// <response code="400"> La quantité demandée est négative </response>
-        /// <response code="400"> Le produit n'est pas dans le panier </response>
-        /// <response code="404"> Le User n'existe pas </response>
-        /// <response code="404"> Le produit n'existe pas </response>
-        /// <response code="404"> Le Seller n'existe pas </response>
+        [HttpDelete("{userId:int}/{productId:int}/{quantity:int}")]
         public IActionResult RemoveProductFromCart(int userId, int productId, int quantity)
         {
-            var user = context.RemoveProductFromCart(userId, productId, quantity);
-            if (user == null)
-            {
-                return NotFound();
-            }
-            return Ok(user);
+            var cart = context.RemoveProductFromCart(userId, productId, quantity);
+            return Ok(cart);
         }
 
         [HttpGet("{userId:int}")]
-        /// <summary> "Retourne le panier du User" </summary>
-        /// <param name="userId"> Id du User </param>
-        /// <returns> Le panier du User </returns>
-        /// <response code="200"> Le panier du User </response>
-        /// <response code="404"> Le User n'existe pas </response>
         public IActionResult GetCart(int userId)
         {
-            var user = context.GetUserById(userId);
-            if (user == null)
-            {
-                return NotFound();
-            }
-            return Ok(user.UserCart.ToList());
+            var cart = context.GetCart(userId);
+            return Ok(cart);
         }
     }
 }

@@ -62,12 +62,10 @@ namespace DAL.Model
 
         public DateTime? UpdatedTime { get; set; }
 
+        // Clé étrangère vers l'utilisateur (vendeur)
+        [Required]
         [ForeignKey("Seller")]
-        public int SellerId { get; set; }
+        public int FK_UserId { get; set; }
         public virtual User Seller { get; set; }
-
-        [ForeignKey("CartOwner")]
-        public int CartOwnerId { get; set; }
-        public virtual User CartOwner { get; set; }
     }
 }

@@ -15,7 +15,9 @@ namespace DAL.Data
 
         User UpdateUserMoney(int userId, double userMoney);
 
-        IEnumerable<Product> GetProducts(SortCategory sortCategory, int limit);
+        IEnumerable<Product> GetProductSortedBy(SortCategory sortCategory, int limit);
+
+        IEnumerable<Product> GetProducts();
 
         Product GetProductById(int id);
 
@@ -30,9 +32,19 @@ namespace DAL.Data
         User AddProductToCart(int userId, int productId, int quantity);
 
         User RemoveProductFromCart(int userId, int productId, int quantity);
-        
+
         User BuyCart(int userId);
 
-        IEnumerable<Product> GetProductsOnSale(int userId);
+        IEnumerable<Cart> GetCart(int userId);
+
+        //Cart AddProductToCart(int userId, int productId, int quantity);
+
+        //Cart RemoveProductFromCart(int userId, int productId, int quantity);
+        
+        //Cart BuyCart(int userId);
+
+        //Cart GetCart(int userId);
+
+        //IEnumerable<Product> GetProductsOnSale(int userId);
     }
 }
