@@ -36,9 +36,14 @@ namespace IBay.Controllers
         {
             var user = _context.GetUserByEmail(userEmail);
 
-            if (user == null || user.UserPassword != userPassword)
+            if (user == null)
             {
                 return Unauthorized("Identifiants invalides");
+            }
+
+            if(!BCrypt.Net.BCrypt.Verify(userPassword, user.UserPassword))
+            {
+                return Unauthorized("Invalid credentials");
             }
             
             var token = GenerateJwtToken(user);

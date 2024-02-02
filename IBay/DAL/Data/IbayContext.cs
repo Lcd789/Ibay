@@ -42,11 +42,14 @@ namespace DAL.Data
 
         public User CreateUser(string userPseudo, string userEmail, string userPassword)
         {
+            var salt = BCrypt.Net.BCrypt.GenerateSalt();
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(userPassword, salt);
+
             var newUser = new User()
             {
                 UserPseudo = userPseudo,
                 UserEmail = userEmail,
-                UserPassword = userPassword,
+                UserPassword = hashedPassword,
                 UserMoney = 0,
                 UserRole = UserRole.StandardUser,
                 UpdatedDate = null,
@@ -87,19 +90,6 @@ namespace DAL.Data
         {
             return Users.SingleOrDefault(u => u.UserId == userId)!;
         }
-        /*
-        public IEnumerable<Product> GetProductsOnSale(int userId)
-        {
-            var userToGetProductsOnSale = Users.FirstOrDefault(u => u.UserId == userId);
-            if (userToGetProductsOnSale == null)
-            {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
-            }
-
-            var products = Products.Where(p => p.SellerId == userId).ToList();
-
-            return products;
-        }*/
 
         public User UpdateUser(int userId, string userEmail, string userPseudo, string userPassword)
         {
@@ -200,6 +190,7 @@ namespace DAL.Data
 
         public Product CreateProduct(int sellerId, string productName, string productDescription, ProductType productType, double productPrice, int productStock)
         {
+            
             var seller = Users.FirstOrDefault(u => u.UserId == sellerId);
             if (seller == null)
             {
@@ -327,7 +318,7 @@ namespace DAL.Data
                 throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
             }
 
-            var cart = Carts.Where(c => c.FK_UserId == userId).ToList();
+            var cart = Carts.Where(c => c.FK_UserId == userId).Include(c=>c.Product).ToList();
             if (cart.Count == 0)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("Cart is empty");
@@ -345,7 +336,7 @@ namespace DAL.Data
         // User n'a pas de relation avec Cart, mais Cart a une relation avec User
         // Cart a une relation avec Product
 
-        public User AddProductToCart(int userId, int productId, int quantity)
+        public void AddProductToCart(int userId, int productId, int quantity)
         {
             var userToAddProductToCart = Users.FirstOrDefault(u => u.UserId == userId);
             if (userToAddProductToCart == null)
@@ -358,6 +349,8 @@ namespace DAL.Data
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("Product not found");
             }
+            
+            
 
             if (quantity <= 0)
             {
@@ -379,50 +372,31 @@ namespace DAL.Data
                 var newCart = new Cart()
                 {
                     FK_ProductId = productId,
+                    Product = productToAddToCart,
                     FK_UserId = userId,
+                    User = userToAddProductToCart,
                     Quantity = quantity
                 };
-                
+                Console.WriteLine();
+                Console.WriteLine("#################################################################################");
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine("newCart : " + newCart);
+                Console.WriteLine("newCart Type : " + newCart.GetType());
+                Console.WriteLine("newCart.Product : " + newCart.Product.ProductName);
+                Console.WriteLine("newCart.User : " + newCart.User.UserPseudo);
+                Console.WriteLine("newCart.Quantity : " + newCart.Quantity);
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine("#################################################################################");
+                Console.WriteLine();
                 Carts.Add(newCart);
-            }
-
-            SaveChanges();
-            return userToAddProductToCart;
-            // 2 cas:
-            // 1. Le produit est déjà dans le panier
-            var productInCart = Carts.FirstOrDefault(c => c.FK_UserId == userId && c.FK_ProductId == productId);
-            Console.WriteLine();
-            Console.WriteLine("#################################################################################");
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine(productInCart);
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine("#################################################################################");
-            Console.WriteLine();
-            /*
-            if (productInCart != null)
-            {
-                productInCart.Quantity += quantity;
                 SaveChanges();
-                return userToAddProductToCart;
             }
-            // 2. Le produit n'est pas dans le panier
-            var cart = new Cart()
-            {
-                FK_UserId = userId,
-                User = userToAddProductToCart,
-                FK_ProductId = productId,
-                Product = productToAddToCart,
-                Quantity = quantity
-            };
-            Carts.Add(cart);
-            SaveChanges();
-            return userToAddProductToCart;*/
         }
 
         // RemoveProductFromCart
@@ -511,43 +485,6 @@ namespace DAL.Data
             SaveChanges();
             return userToBuyCart;
         }
-
-
-
-
-        
-        /*
-        public User BuyCart(int userId)
-        {
-            var userToBuyCart = Users.FirstOrDefault(u => u.UserId == userId);
-            if (userToBuyCart == null)
-            {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
-            }
-
-            var cart = userToBuyCart.UserCart;
-            if (cart.Items.Count == 0)
-            {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("Cart is empty");
-            }
-
-            double totalPrice = 0;
-            foreach (var product in cart.Items)
-            {
-                totalPrice += product.Product.ProductPrice;
-            }
-
-            if (userToBuyCart.UserMoney < totalPrice)
-            {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("Not enough money");
-            }
-
-            userToBuyCart.UserMoney -= totalPrice;
-            cart.Items.Clear();
-            SaveChanges();
-            return userToBuyCart;
-        }*/
-
 
     }
 }

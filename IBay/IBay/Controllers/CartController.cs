@@ -1,5 +1,6 @@
 ﻿using DAL.Data;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace IBay.Controllers
 {
@@ -28,8 +29,8 @@ namespace IBay.Controllers
         /// <response code="409"> If the product is not available </response>
         public IActionResult AddProductToCart(int userId, int productId, int quantity)
         {
-            var cart = context.AddProductToCart(userId, productId, quantity);
-            return Ok(cart);
+            context.AddProductToCart(userId, productId, quantity);
+            return Ok();
         }
 
         [HttpDelete("{userId:int}/{productId:int}/{quantity:int}")]

@@ -33,20 +33,6 @@ namespace IBay.Controllers
             return Ok(user);
         }
 
-
-        /*
-        [HttpGet("{userId:int}/cart")]
-        public IActionResult GetCart(int userId)
-        {
-            var user = context.GetUserById(userId);
-            if (user == null)
-            {
-                return NotFound();
-            }
-            var cart = user.UserCart;
-            return Ok(cart);
-        }*/
-
         [HttpPut("{id:int}")]
         public IActionResult Update(int id, [FromBody] User user)
         {

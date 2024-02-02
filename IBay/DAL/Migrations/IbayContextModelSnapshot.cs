@@ -82,8 +82,6 @@ namespace DAL.Migrations
 
                     b.HasKey("ProductId");
 
-                    b.HasIndex("FK_UserId");
-
                     b.ToTable("Products");
                 });
 
@@ -142,17 +140,6 @@ namespace DAL.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("DAL.Model.Product", b =>
-                {
-                    b.HasOne("DAL.Model.User", "Seller")
-                        .WithMany()
-                        .HasForeignKey("FK_UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Seller");
                 });
 #pragma warning restore 612, 618
         }

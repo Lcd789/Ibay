@@ -78,23 +78,6 @@ namespace IBay.Controllers
             }
             return Ok(product);
         }
-        /*
-        [HttpGet("user/{userid:int}/products")]
-        /// <summary> Gets all the products of a user </summary>
-        /// <param name="userId"> The id of the user </param>
-        /// <returns> The products of the user </returns>
-        /// <response code="200"> Returns the products of the user </response>
-        /// <response code="404"> If the user is not found </response>
-        /// <response code="400"> If the user is not valid </response>
-        public IActionResult GetProductsOnSale(int userId)
-        {
-            var product = context.GetProductsOnSale(userId).ToList();
-            if (product == null)
-            {
-                return NotFound();
-            }
-            return Ok(product);
-        }*/
 
         [HttpPut("{id:int}")]
         /// <summary> Updates a product </summary>

@@ -29,7 +29,7 @@ namespace DAL.Data
 
         Product UpdateProduct(int productId, string productName, string productDescription, ProductType productType, double? productPrice, int? productStock, bool? available);
 
-        User AddProductToCart(int userId, int productId, int quantity);
+        void AddProductToCart(int userId, int productId, int quantity);
 
         User RemoveProductFromCart(int userId, int productId, int quantity);
 
@@ -37,14 +37,5 @@ namespace DAL.Data
 
         IEnumerable<Cart> GetCart(int userId);
 
-        //Cart AddProductToCart(int userId, int productId, int quantity);
-
-        //Cart RemoveProductFromCart(int userId, int productId, int quantity);
-        
-        //Cart BuyCart(int userId);
-
-        //Cart GetCart(int userId);
-
-        //IEnumerable<Product> GetProductsOnSale(int userId);
     }
 }

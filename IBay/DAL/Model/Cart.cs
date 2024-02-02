@@ -19,7 +19,6 @@ namespace DAL.Model
         public int FK_ProductId { get; set; }
         public virtual Product Product { get; set; }
 
-        // Clé étrangère vers l'utilisateur
         [ForeignKey("User")]
         public int FK_UserId { get; set; }
         public virtual User User { get; set; }
