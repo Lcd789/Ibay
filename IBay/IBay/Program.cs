@@ -1,6 +1,7 @@
 using DAL.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Swashbuckle.AspNetCore.Filters;
 using System.Text;
 
 namespace IBay
@@ -15,7 +16,7 @@ namespace IBay
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            
+
             var configuration = builder.Configuration;
             var jwtKey = configuration["Jwt:Secret"];
             var key = Encoding.ASCII.GetBytes(jwtKey);
@@ -31,6 +32,21 @@ namespace IBay
                         ValidateAudience = false,
                     };
                 });
+
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Votre API", Version = "v1" });
+
+                c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme",
+                    Name = "Authorization",
+                    In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+                    Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+                c.OperationFilter<SecurityRequirementsOperationFilter>();
+            });
 
             var app = builder.Build();
 

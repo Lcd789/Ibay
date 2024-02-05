@@ -1,13 +1,17 @@
 ﻿using DAL.Data;
 using DAL.Model;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using static IBay.AuthorizationMiddleware;
 
 namespace IBay.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class UserController(IIbayContext context) : ControllerBase
     {
+        [AllowAnonymous]
         [HttpPost]
         public IActionResult Create(string userPseudo, string userEmail, string userPassword)
         {
@@ -36,11 +40,17 @@ namespace IBay.Controllers
         [HttpPut("{id:int}")]
         public IActionResult Update(int id, [FromBody] User user)
         {
+            if (!IsSelfTargetting(HttpContext))
+            {
+                return Forbid();
+            }
+
             var updatedUser = context.UpdateUser(id, user.UserEmail, user.UserPseudo, user.UserPassword);
             if (updatedUser == null)
             {
                 return NotFound();
             }
+
             return Ok(updatedUser);
         }
 
@@ -58,11 +68,17 @@ namespace IBay.Controllers
         [HttpDelete("{id:int}")]
         public IActionResult Delete(int id)
         {
+            if (!IsSelfTargetting(HttpContext))
+            {
+                return Forbid();
+            }
+
             var user = context.DeleteUser(id);
             if (user == null)
             {
                 return NotFound();
             }
+
             return Ok(user);
         }
 
