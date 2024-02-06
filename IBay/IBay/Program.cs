@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Filters;
 using System.Text;
+using Microsoft.OpenApi.Models;
 
 namespace IBay
 {
@@ -19,7 +20,7 @@ namespace IBay
 
             var configuration = builder.Configuration;
             var jwtKey = configuration["Jwt:Secret"];
-            var key = Encoding.ASCII.GetBytes(jwtKey);
+            var key = Encoding.ASCII.GetBytes(jwtKey!);
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -30,22 +31,35 @@ namespace IBay
                         IssuerSigningKey = new SymmetricSecurityKey(key),
                         ValidateIssuer = false,
                         ValidateAudience = false,
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.Zero
                     };
                 });
 
             builder.Services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Votre API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Ibay API", Version = "v1" });
+                c.EnableAnnotations();
 
-                c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                var securityScheme = new OpenApiSecurityScheme
                 {
-                    Description = "JWT Authorization header using the Bearer scheme",
-                    Name = "Authorization",
-                    In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-                    Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer"
+                    Name = "JWT Authentication",
+                    Description = "Enter your JWT token",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    Reference = new OpenApiReference
+                    {
+                        Id = JwtBearerDefaults.AuthenticationScheme,
+                        Type = ReferenceType.SecurityScheme
+                    }
+                };
+                c.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, securityScheme);
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    { securityScheme, Array.Empty<string>() }
                 });
-                c.OperationFilter<SecurityRequirementsOperationFilter>();
             });
 
             var app = builder.Build();

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -21,15 +19,13 @@ namespace DAL.Model
     {
         [Key]
         public int UserId { get; set; }
-
-
+        
         [RegularExpression(@"^[a-zA-Z0-9_-]+$")]
         [DataType(DataType.Text)]
         [Column(TypeName = "varchar(50)")]
         [Required, MaxLength(50), MinLength(3)]
         public string UserPseudo { get; set; }
-
-
+        
         [DataType(DataType.EmailAddress)]
         [EmailAddress]
         [Required, MaxLength(80), MinLength(3)]

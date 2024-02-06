@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -61,8 +59,6 @@ namespace DAL.Model
         public DateTime AddedTime { get; set; }
 
         public DateTime? UpdatedTime { get; set; }
-
-        // Clé étrangère vers l'utilisateur (vendeur)
         
         [Required]
         [ForeignKey("Seller")]
