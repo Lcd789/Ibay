@@ -13,9 +13,10 @@ namespace DAL.Model
     public class Cart
     {
         [Key]
-        public int CartId { get; set; }
+        public int cart_id { get; set; }
 
         [ForeignKey("Product")]
+<<<<<<< Updated upstream
         public int FK_ProductId { get; set; }
         public virtual Product Product { get; set; }
 
@@ -23,10 +24,18 @@ namespace DAL.Model
         public int FK_UserId { get; set; }
         public virtual User User { get; set; }
 
+=======
+        public int fk_product_id { get; set; }
+        public Product product { get; set; }
+
+        [ForeignKey("User")]
+        public int fk_user_id { get; set; }
+        public User user { get; set; }
+>>>>>>> Stashed changes
         
 
         [Required]
         [Column(TypeName = "int")]
-        public int Quantity { get; set; }
+        public int quantity { get; set; }
     }
 }

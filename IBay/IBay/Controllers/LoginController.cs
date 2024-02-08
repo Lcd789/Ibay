@@ -32,7 +32,14 @@ namespace IBay.Controllers
         /// <response code="500">Erreur interne</response>
         [HttpPost]
         [AllowAnonymous]
+<<<<<<< Updated upstream
         public IActionResult Login(string userEmail, string userPassword)
+=======
+        [SwaggerOperation("User Login")]
+        [SwaggerResponse(200, "Login successful")]
+        [SwaggerResponse(401, "Unauthorized", null)]
+        public IActionResult Login(string userEmail, string user_password)
+>>>>>>> Stashed changes
         {
             var user = _context.GetUserByEmail(userEmail);
 
@@ -41,7 +48,7 @@ namespace IBay.Controllers
                 return Unauthorized("Identifiants invalides");
             }
 
-            if(!BCrypt.Net.BCrypt.Verify(userPassword, user.UserPassword))
+            if(!BCrypt.Net.BCrypt.Verify(user_password, user.user_password))
             {
                 return Unauthorized("Invalid credentials");
             }
@@ -60,8 +67,8 @@ namespace IBay.Controllers
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-                    new Claim(ClaimTypes.Name, user.UserEmail)
+                    new Claim(ClaimTypes.NameIdentifier, user.user_id.ToString()),
+                    new Claim(ClaimTypes.Name, user.user_email)
                 }),
                 Expires = DateTime.UtcNow.AddHours(24),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

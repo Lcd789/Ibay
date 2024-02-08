@@ -13,6 +13,27 @@ namespace DAL.Data
         Price
     }
 
+    public class UserNotFoundException : Exception
+    {
+        public UserNotFoundException(string message) : base("Utilisateur non trouvé")
+        {
+        }
+    }
+
+    public class ProductNotFoundException : Exception
+    {
+        public ProductNotFoundException(string message) : base("Produit non trouvé")
+        {
+        }
+    }
+
+    public class CartNotFoundException : Exception
+    {
+        public CartNotFoundException(string message) : base("Panier non trouvé")
+        {
+        }
+    }
+
     public class IbayContext : DbContext, IIbayContext
     {
         public DbSet<User> Users { get; set; }
@@ -47,13 +68,13 @@ namespace DAL.Data
 
             var newUser = new User()
             {
-                UserPseudo = userPseudo,
-                UserEmail = userEmail,
-                UserPassword = hashedPassword,
-                UserMoney = 0,
-                UserRole = UserRole.StandardUser,
-                UpdatedDate = null,
-                CreationDate = DateTime.Now,
+                user_pseudo = userPseudo,
+                user_email = userEmail,
+                user_password = hashedPassword,
+                user_money = 0,
+                user_role = UserRole.StandardUser,
+                updated_date = null,
+                creation_date = DateTime.Now,
             };
 
             var errorMessage = newUser.ValidateUser();
@@ -71,29 +92,34 @@ namespace DAL.Data
             return Users.ToList();
         }
 
-        public User GetUserById(int userId)
+        public User GetUserById(int user_id)
         {
-            return Users.SingleOrDefault(u => u.UserId == userId)!;
+            return Users.SingleOrDefault(u => u.user_id == user_id)!;
         }
         
         public User GetUserByEmail(string userEmail)
         {
-            return Users.SingleOrDefault(u => u.UserEmail == userEmail)!;
+            return Users.SingleOrDefault(u => u.user_email == userEmail)!;
         }
         
         public User GetUserByPseudo(string userPseudo)
         {
-            return Users.SingleOrDefault(u => u.UserPseudo == userPseudo)!;
+            return Users.SingleOrDefault(u => u.user_pseudo == userPseudo)!;
         }
 
-        public User GetUserCart(int userId)
+        public User GetUserCart(int user_id)
         {
-            return Users.SingleOrDefault(u => u.UserId == userId)!;
+            return Users.SingleOrDefault(u => u.user_id == user_id)!;
         }
 
-        public User UpdateUser(int userId, string userEmail, string userPseudo, string userPassword)
+        public User UpdateUser(int user_id, string userEmail, string userPseudo, string userPassword)
         {
+<<<<<<< Updated upstream
             var userToUpdate = Users.FirstOrDefault(u => u.UserId == userId);
+=======
+            var userToUpdate = Users.FirstOrDefault(u => u.user_id == user_id);
+            
+>>>>>>> Stashed changes
             if (userToUpdate == null)
             {
                 return null!;
@@ -101,18 +127,18 @@ namespace DAL.Data
 
             if (!userEmail.IsNullOrEmpty())
             {
-                userToUpdate.UserEmail = userEmail;
+                userToUpdate.user_email = userEmail;
             }
             if (!userPseudo.IsNullOrEmpty())
             {
-                userToUpdate.UserPseudo = userPseudo;
+                userToUpdate.user_pseudo = userPseudo;
             }
             if (!userPassword.IsNullOrEmpty())
             {
-                userToUpdate.UserPassword = userPassword;
+                userToUpdate.user_password = userPassword;
             }
             
-            userToUpdate.UpdatedDate = DateTime.Now;
+            userToUpdate.updated_date = DateTime.Now;
 
             var errorMessage = userToUpdate.ValidateUser();
             if (!string.IsNullOrEmpty(errorMessage))
@@ -123,24 +149,29 @@ namespace DAL.Data
             return userToUpdate;
         }
 
-        public User UpdateUserMoney(int userId, double money)
+        public User UpdateUserMoney(int user_id, double money)
         {
+<<<<<<< Updated upstream
             var userToPutMoney = Users.FirstOrDefault(u => u.UserId == userId);
+=======
+            var userToPutMoney = Users.FirstOrDefault(u => u.user_id == user_id);
+            
+>>>>>>> Stashed changes
             if (userToPutMoney == null)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
             }
 
-            userToPutMoney.UserMoney += money switch
+            userToPutMoney.user_money += money switch
             {
                 0 => throw new System.ComponentModel.DataAnnotations.ValidationException(
                     "You can't put 0 in this method"),
-                < 0 when userToPutMoney.UserMoney - money >= 0 => money,
+                < 0 when userToPutMoney.user_money - money >= 0 => money,
                 < 0 => throw new System.ComponentModel.DataAnnotations.ValidationException("Not enough money"),
                 _ => money
             };
 
-            if (userToPutMoney.UserMoney <= 0)
+            if (userToPutMoney.user_money <= 0)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("Not enough money");
             }
@@ -150,9 +181,14 @@ namespace DAL.Data
             return userToPutMoney;
         }
 
-        public User DeleteUser(int userId)
+        public User DeleteUser(int user_id)
         {
+<<<<<<< Updated upstream
             var userToDelete = Users.SingleOrDefault(u => u.UserId == userId);
+=======
+            var userToDelete = Users.SingleOrDefault(u => u.user_id == user_id);
+            
+>>>>>>> Stashed changes
             if (userToDelete == null)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
@@ -164,9 +200,14 @@ namespace DAL.Data
             return userToDelete;
         }
 
-        public User ChangeUserRole(int userId, UserRole role)
+        public User ChangeUserRole(int user_id, UserRole role)
         {
+<<<<<<< Updated upstream
             var userToChangeRole = Users.FirstOrDefault(u => u.UserId == userId);
+=======
+            var userToChangeRole = Users.FirstOrDefault(u => u.user_id == user_id);
+            
+>>>>>>> Stashed changes
             if (userToChangeRole == null)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
@@ -177,13 +218,14 @@ namespace DAL.Data
                 throw new ArgumentException("Invalid user role");
             }
 
-            userToChangeRole.UserRole = role;
+            userToChangeRole.user_role = role;
 
             SaveChanges();
 
             return userToChangeRole;
         }
 
+<<<<<<< Updated upstream
 
         // PRODUCT
 
@@ -192,6 +234,14 @@ namespace DAL.Data
         {
             
             var seller = Users.FirstOrDefault(u => u.UserId == sellerId);
+=======
+        public Product CreateProduct(int sellerId, string product_name, string product_description,
+            ProductType product_type, double product_price, int product_stock)
+        {
+            
+            var seller = Users.FirstOrDefault(u => u.user_id == sellerId);
+            
+>>>>>>> Stashed changes
             if (seller == null)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("Seller not found");
@@ -199,14 +249,14 @@ namespace DAL.Data
             
             var newProduct = new Product()
             {
-                ProductName = productName,
-                ProductDescription = productDescription,
-                ProductType = productType,
-                ProductPrice = productPrice,
-                ProductStock = productStock,
-                AddedTime = DateTime.Now,
-                UpdatedTime = null,
-                FK_UserId = sellerId
+                product_name = product_name,
+                product_description = product_description,
+                product_type = product_type,
+                product_price = product_price,
+                product_stock = product_stock,
+                added_time = DateTime.Now,
+                updated_time = null,
+                fk_user_id = sellerId
             };
             // Vérifier que le produit n'existe pas déjà
             Products.Add(newProduct);
@@ -214,16 +264,20 @@ namespace DAL.Data
             return newProduct;
         }
         
+<<<<<<< Updated upstream
         
 
         public Product GetProductById(int productId)
+=======
+        public Product GetProductById(int product_id)
+>>>>>>> Stashed changes
         {
-            return Products.SingleOrDefault(p => p.ProductId == productId)!;
+            return Products.SingleOrDefault(p => p.product_id == product_id)!;
         }
 
-        public Product GetProductByName(string productName)
+        public Product GetProductByName(string product_name)
         {
-            return Products.SingleOrDefault(p => p.ProductName == productName)!;
+            return Products.SingleOrDefault(p => p.product_name == product_name)!;
         }
 
         public IEnumerable<Product> GetProducts()
@@ -241,57 +295,95 @@ namespace DAL.Data
             IQueryable<Product> query = Products;
             query = sortCategory switch
             {
-                SortCategory.Date => query.OrderByDescending(p => p.AddedTime),
-                SortCategory.Type => query.OrderBy(p => p.ProductType),
-                SortCategory.Name => query.OrderBy(p => p.ProductName),
-                SortCategory.Price => query.OrderBy(p => p.ProductPrice),
-                _ => query.OrderByDescending(p => p.AddedTime)
+                SortCategory.Date => query.OrderByDescending(p => p.added_time),
+                SortCategory.Type => query.OrderBy(p => p.product_type),
+                SortCategory.Name => query.OrderBy(p => p.product_name),
+                SortCategory.Price => query.OrderBy(p => p.product_price),
+                _ => query.OrderByDescending(p => p.added_time)
             };
 
             return query.Take(limit).ToList();
         }
 
+<<<<<<< Updated upstream
         public Product UpdateProduct(int productId, string productName, string productDescription, ProductType productType, double? productPrice, int? productStock, bool? available)
         {
             var productToUpdate = Products.FirstOrDefault(p => p.ProductId == productId);
+=======
+        public Product UpdateProduct(int product_id, string product_name, string product_description,
+            ProductType product_type, double? product_price, int? product_stock, bool? available)
+        {
+            var productToUpdate = Products.FirstOrDefault(p => p.product_id == product_id);
+            
+>>>>>>> Stashed changes
             if (productToUpdate == null)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("Product not found");
             }
 
-            if (!productName.IsNullOrEmpty())
+            if (!product_name.IsNullOrEmpty())
             {
-                productToUpdate.ProductName = productName;
+                productToUpdate.product_name = product_name;
             }
+<<<<<<< Updated upstream
             if (!productDescription.IsNullOrEmpty())
+=======
+            
+            if (!product_description.IsNullOrEmpty())
+>>>>>>> Stashed changes
             {
-                productToUpdate.ProductDescription = productDescription;
+                productToUpdate.product_description = product_description;
             }
+<<<<<<< Updated upstream
             if (productType != productToUpdate.ProductType)
+=======
+            
+            if (product_type != productToUpdate.product_type)
+>>>>>>> Stashed changes
             {
-                productToUpdate.ProductType = productType;
+                productToUpdate.product_type = product_type;
             }
+<<<<<<< Updated upstream
             if (productPrice != null)
+=======
+            
+            if (product_price != null)
+>>>>>>> Stashed changes
             {
-                productToUpdate.ProductPrice = productPrice.Value;
+                productToUpdate.product_price = product_price.Value;
             }
+<<<<<<< Updated upstream
             if (productStock != null)
+=======
+            
+            if (product_stock != null)
+>>>>>>> Stashed changes
             {
-                productToUpdate.ProductStock = productStock.Value;
+                productToUpdate.product_stock = product_stock.Value;
             }
             if (available != null)
             {
-                productToUpdate.Available = available.Value;
+                productToUpdate.available = available.Value;
             }
             
+<<<<<<< Updated upstream
             productToUpdate.UpdatedTime = DateTime.Now;
+=======
+            productToUpdate.updated_time = DateTime.Now;
+            
+>>>>>>> Stashed changes
             SaveChanges();
             return productToUpdate;
         }
         
-        public Product DeleteProduct(int productId)
+        public Product DeleteProduct(int product_id)
         {
+<<<<<<< Updated upstream
             var productToDelete = Products.SingleOrDefault(p => p.ProductId == productId);
+=======
+            var productToDelete = Products.SingleOrDefault(p => p.product_id == product_id);
+            
+>>>>>>> Stashed changes
             if (productToDelete == null)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("Product not found");
@@ -310,15 +402,26 @@ namespace DAL.Data
 
         // GetCart
 
-        public IEnumerable<Cart> GetCart(int userId)
+        public IEnumerable<Cart> GetCart(int user_id)
         {
+<<<<<<< Updated upstream
             var userToGetCart = Users.FirstOrDefault(u => u.UserId == userId);
+=======
+            var userToGetCart = Users.FirstOrDefault(u => u.user_id == user_id);
+            
+>>>>>>> Stashed changes
             if (userToGetCart == null)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
             }
 
+<<<<<<< Updated upstream
             var cart = Carts.Where(c => c.FK_UserId == userId).Include(c=>c.Product).ToList();
+=======
+            var cart = Carts.Where(c => c.fk_user_id == user_id).Include(c=>c.product)
+                .ToList();
+            
+>>>>>>> Stashed changes
             if (cart.Count == 0)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("Cart is empty");
@@ -327,6 +430,7 @@ namespace DAL.Data
             return cart;
         }
 
+<<<<<<< Updated upstream
 
         // AddProductToCart
         // Un User n'a qu'un Cart, si le cart n'existe pas, on le crée
@@ -339,12 +443,23 @@ namespace DAL.Data
         public void AddProductToCart(int userId, int productId, int quantity)
         {
             var userToAddProductToCart = Users.FirstOrDefault(u => u.UserId == userId);
+=======
+        public void AddProductToCart(int user_id, int product_id, int quantity)
+        {
+            var userToAddProductToCart = Users.FirstOrDefault(u => u.user_id == user_id);
+            
+>>>>>>> Stashed changes
             if (userToAddProductToCart == null)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
             }
 
+<<<<<<< Updated upstream
             var productToAddToCart = Products.FirstOrDefault(p => p.ProductId == productId);
+=======
+            var productToAddToCart = Products.FirstOrDefault(p => p.product_id == product_id);
+            
+>>>>>>> Stashed changes
             if (productToAddToCart == null)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("Product not found");
@@ -357,25 +472,30 @@ namespace DAL.Data
                 throw new System.ComponentModel.DataAnnotations.ValidationException("Quantity must be positive");
             }
 
-            if (productToAddToCart.ProductStock <= quantity)
+            if (productToAddToCart.product_stock <= quantity)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("Not enough stock");
             }
 
+<<<<<<< Updated upstream
             var existingCart = Carts.FirstOrDefault(c => c.FK_UserId == userId);
+=======
+            var existingCart = Carts.FirstOrDefault(c => c.fk_user_id == user_id);
+            
+>>>>>>> Stashed changes
             if(existingCart != null)
             {
-                existingCart.Quantity += quantity;
+                existingCart.quantity += quantity;
             }
             else
             {
                 var newCart = new Cart()
                 {
-                    FK_ProductId = productId,
-                    Product = productToAddToCart,
-                    FK_UserId = userId,
-                    User = userToAddProductToCart,
-                    Quantity = quantity
+                    fk_product_id = product_id,
+                    product = productToAddToCart,
+                    fk_user_id = user_id,
+                    user = userToAddProductToCart,
+                    quantity = quantity
                 };
                 Console.WriteLine();
                 Console.WriteLine("#################################################################################");
@@ -398,6 +518,7 @@ namespace DAL.Data
                 SaveChanges();
             }
         }
+<<<<<<< Updated upstream
 
         // RemoveProductFromCart
         // Si le produit n'est pas dans le panier, erreur 404
@@ -408,12 +529,24 @@ namespace DAL.Data
         public User RemoveProductFromCart(int userId, int productId, int quantity)
         {
             var userToRemoveProductFromCart = Users.FirstOrDefault(u => u.UserId == userId);
+=======
+        
+        public User RemoveProductFromCart(int user_id, int product_id, int quantity)
+        {
+            var userToRemoveProductFromCart = Users.FirstOrDefault(u => u.user_id == user_id);
+            
+>>>>>>> Stashed changes
             if (userToRemoveProductFromCart == null)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
             }
 
+<<<<<<< Updated upstream
             var productToRemoveFromCart = Products.FirstOrDefault(p => p.ProductId == productId);
+=======
+            var productToRemoveFromCart = Products.FirstOrDefault(p => p.product_id == product_id);
+            
+>>>>>>> Stashed changes
             if (productToRemoveFromCart == null)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("Product not found");
@@ -424,29 +557,40 @@ namespace DAL.Data
                 throw new System.ComponentModel.DataAnnotations.ValidationException("Quantity must be positive");
             }
 
+<<<<<<< Updated upstream
             var productInCart = Carts.FirstOrDefault(c => c.FK_UserId == userId && c.FK_ProductId == productId);
+=======
+            var productInCart = Carts.FirstOrDefault(c => c.fk_user_id == user_id && c.fk_product_id == product_id);
+            
+>>>>>>> Stashed changes
             if (productInCart == null)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("Product not in cart");
             }
 
-            if (quantity > productInCart.Quantity)
+            if (quantity > productInCart.quantity)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("Quantity in cart is less than quantity to remove");
             }
 
-            if (quantity == productInCart.Quantity)
+            if (quantity == productInCart.quantity)
             {
                 Carts.Remove(productInCart);
                 SaveChanges();
                 return userToRemoveProductFromCart;
             }
 
+<<<<<<< Updated upstream
             productInCart.Quantity -= quantity;
+=======
+            productInCart.quantity -= quantity;
+            
+>>>>>>> Stashed changes
             SaveChanges();
             return userToRemoveProductFromCart;
         }
 
+<<<<<<< Updated upstream
         // BuyCart
         // Si le User n'existe pas, erreur 404
         // Si le panier est vide, erreur 400
@@ -457,16 +601,28 @@ namespace DAL.Data
         public User BuyCart(int userId)
         {
             User userToBuyCart = Users.FirstOrDefault(u => u.UserId == userId);
+=======
+        public User BuyCart(int user_id)
+        {
+            var userToBuyCart = Users.FirstOrDefault(u => u.user_id == user_id);
+            
+>>>>>>> Stashed changes
             if (userToBuyCart == null)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
             }
+<<<<<<< Updated upstream
             // On récupère le panier du User
             var cart = Carts.Where(c => c.FK_UserId == userId).ToList();
+=======
+            var cart = Carts.Where(c => c.fk_user_id == user_id).ToList();
+            
+>>>>>>> Stashed changes
             if (cart.Count == 0)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("Cart is empty");
             }
+<<<<<<< Updated upstream
             // On calcule le prix total du panier
             double totalPrice = 0;
             foreach (var product in cart)
@@ -481,6 +637,18 @@ namespace DAL.Data
             // On retire le prix total du panier de l'argent du User
             userToBuyCart.UserMoney -= totalPrice;
             // On vide le panier
+=======
+            
+            var totalPrice = cart.Sum(product => product.product.product_price * product.quantity);
+
+            if (userToBuyCart.user_money < totalPrice)
+            {
+                throw new System.ComponentModel.DataAnnotations.ValidationException("Not enough money");
+            }
+            
+            userToBuyCart.user_money -= totalPrice;
+
+>>>>>>> Stashed changes
             Carts.RemoveRange(cart);
             SaveChanges();
             return userToBuyCart;

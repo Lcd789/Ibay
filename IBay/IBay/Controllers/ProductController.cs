@@ -74,7 +74,21 @@ namespace IBay.Controllers
             var product = context.GetProductById(id);
             if (product == null)
             {
-                return NotFound();
+                return NotFound("Product not found : " + id);
+            }
+            return Ok(product);
+        }
+
+        [HttpGet("{name}")]
+        [SwaggerOperation("Get a product by name")]
+        [SwaggerResponse(200, "Product found")]
+        [SwaggerResponse(404, "Product not found")]
+        public IActionResult GetByName(string name)
+        {
+            var product = context.GetProductByName(name);
+            if (product == null)
+            {
+                return NotFound("Product not found : " + name);
             }
             return Ok(product);
         }
@@ -92,7 +106,7 @@ namespace IBay.Controllers
             var updatedProduct = context.UpdateProduct(id, product.ProductName, product.ProductDescription, product.ProductType, product.ProductPrice, product.ProductStock, product.Available);
             if (updatedProduct == null)
             {
-                return NotFound();
+                return NotFound("Product not found : " + id);
             }
             return Ok(updatedProduct);
         }
@@ -103,7 +117,7 @@ namespace IBay.Controllers
             var product = context.DeleteProduct(id);
             if (product == null)
             {
-                return NotFound();
+                return NotFound("Product not found : " + id);
             }
             return Ok(product);
         }

@@ -32,41 +32,45 @@ namespace DAL.Model
     public class Product
     {
         [Key]
-        public int ProductId { get; set; }
+        public int product_id { get; set; }
 
         [Required, MaxLength(255)]
-        public string ProductName { get; set; }
+        public string product_name { get; set; }
 
         [Required, MaxLength(1000)]
-        public string ProductDescription { get; set; }
+        public string product_description { get; set; }
 
         [Required]
         [EnumDataType(typeof(ProductType))]
         [DefaultValue(ProductType.Other)]
-        public ProductType ProductType { get; set; }
+        public ProductType product_type { get; set; }
 
         [Required]
         [Column(TypeName = "decimal(18,2)")]
         [DefaultValue(0.01)]
-        public double ProductPrice { get; set; }
+        public double product_price { get; set; }
 
         [Required]
         [DefaultValue(0)]
-        public int ProductStock { get; set; }
+        public int product_stock { get; set; }
 
         [Required]
-        public bool Available { get; set; }
+        public bool available { get; set; }
 
         [Required]
-        public DateTime AddedTime { get; set; }
+        public DateTime added_time { get; set; }
 
+<<<<<<< Updated upstream
         public DateTime? UpdatedTime { get; set; }
 
         // Clé étrangère vers l'utilisateur (vendeur)
+=======
+        public DateTime? updated_time { get; set; }
+>>>>>>> Stashed changes
         
         [Required]
         [ForeignKey("Seller")]
-        public int FK_UserId { get; set; }
-        public virtual User Seller { get; set; }
+        public int fk_user_id { get; set; }
+        public virtual User seller { get; set; }
     }
 }
