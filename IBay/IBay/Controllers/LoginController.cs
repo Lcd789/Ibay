@@ -29,7 +29,7 @@ namespace IBay.Controllers
                 return Unauthorized("Invalid credentials");
             }
 
-            if(!BCrypt.Net.BCrypt.Verify(userPassword, user.UserPassword))
+            if(!BCrypt.Net.BCrypt.Verify(userPassword, user.user_password))
             {
                 return Unauthorized("Invalid credentials");
             }
@@ -48,8 +48,8 @@ namespace IBay.Controllers
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-                    new Claim(ClaimTypes.Name, user.UserEmail)
+                    new Claim(ClaimTypes.NameIdentifier, user.user_id.ToString()),
+                    new Claim(ClaimTypes.Name, user.user_email)
                 }),
                 Expires = DateTime.UtcNow.AddHours(24),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),

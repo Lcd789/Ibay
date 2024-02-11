@@ -87,7 +87,7 @@ namespace IBay.Controllers
             {
                 return Forbid();
             }
-            if(productToCheck.Seller.UserId != int.Parse(userId))
+            if(productToCheck.seller.user_id != int.Parse(userId))
             {
                 Console.WriteLine("Not product owner");
                 return Forbid();
@@ -122,7 +122,7 @@ namespace IBay.Controllers
             {
                 return Forbid();
             }
-            if (productToCheck.Seller.UserId != int.Parse(userId))
+            if (productToCheck.seller.user_id != int.Parse(userId))
             {
                 Console.WriteLine("Not product owner");
                 return Forbid();

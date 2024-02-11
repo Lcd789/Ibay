@@ -18,36 +18,36 @@ namespace DAL.Model
     public class User
     {
         [Key]
-        public int UserId { get; set; }
+        public int user_id { get; set; }
         
         [RegularExpression(@"^[a-zA-Z0-9_-]+$")]
         [DataType(DataType.Text)]
         [Column(TypeName = "varchar(50)")]
         [Required, MaxLength(50), MinLength(3)]
-        public string UserPseudo { get; set; }
+        public string user_pseudo { get; set; }
         
         [DataType(DataType.EmailAddress)]
         [EmailAddress]
         [Required, MaxLength(80), MinLength(3)]
-        public string UserEmail { get; set; }
+        public string user_email { get; set; }
 
         [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,255}$")]
         [DataType(DataType.Password)]
         [Required, MaxLength(255), MinLength(8)]
-        public string UserPassword { get; set; }
+        public string user_password { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
         [DefaultValue(0)]
-        public double UserMoney { get; set; }
+        public double user_money { get; set; }
 
         [Required]
         [EnumDataType(typeof(UserRole))]
         [DefaultValue(UserRole.StandardUser)]
-        public UserRole UserRole { get; set; }
+        public UserRole user_role { get; set; }
 
         [Required]
-        public DateTime CreationDate { get; set; }
+        public DateTime creation_date { get; set; }
 
-        public DateTime? UpdatedDate { get; set; }
+        public DateTime? updated_date { get; set; }
     }
 }

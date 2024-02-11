@@ -62,13 +62,13 @@ namespace DAL.Data
 
             var newUser = new User()
             {
-                UserPseudo = userPseudo,
-                UserEmail = userEmail,
-                UserPassword = hashedPassword,
-                UserMoney = 0,
-                UserRole = UserRole.StandardUser,
-                UpdatedDate = null,
-                CreationDate = DateTime.Now,
+                user_pseudo = userPseudo,
+                user_email = userEmail,
+                user_password = hashedPassword,
+                user_money = 0,
+                user_role = UserRole.StandardUser,
+                updated_date = null,
+                creation_date = DateTime.Now,
             };
 
             var errorMessage = newUser.ValidateUser();
@@ -91,27 +91,27 @@ namespace DAL.Data
 
         public User GetUserById(int userId)
         {
-            return Users.SingleOrDefault(u => u.UserId == userId)!;
+            return Users.SingleOrDefault(u => u.user_id == userId)!;
         }
         
         public User GetUserByEmail(string userEmail)
         {
-            return Users.SingleOrDefault(u => u.UserEmail == userEmail)!;
+            return Users.SingleOrDefault(u => u.user_email == userEmail)!;
         }
         
         public User GetUserByPseudo(string userPseudo)
         {
-            return Users.SingleOrDefault(u => u.UserPseudo == userPseudo)!;
+            return Users.SingleOrDefault(u => u.user_pseudo == userPseudo)!;
         }
 
         public User GetUserCart(int userId)
         {
-            return Users.SingleOrDefault(u => u.UserId == userId)!;
+            return Users.SingleOrDefault(u => u.user_id == userId)!;
         }
 
         public User UpdateUser(int userId, string userEmail, string userPseudo, string userPassword)
         {
-            var userToUpdate = Users.FirstOrDefault(u => u.UserId == userId);
+            var userToUpdate = Users.FirstOrDefault(u => u.user_id == userId);
             
             if (userToUpdate == null)
             {
@@ -120,20 +120,20 @@ namespace DAL.Data
 
             if (!userEmail.IsNullOrEmpty())
             {
-                userToUpdate.UserEmail = userEmail;
+                userToUpdate.user_email = userEmail;
             }
             
             if (!userPseudo.IsNullOrEmpty())
             {
-                userToUpdate.UserPseudo = userPseudo;
+                userToUpdate.user_pseudo = userPseudo;
             }
             
             if (!userPassword.IsNullOrEmpty())
             {
-                userToUpdate.UserPassword = userPassword;
+                userToUpdate.user_password = userPassword;
             }
             
-            userToUpdate.UpdatedDate = DateTime.Now;
+            userToUpdate.updated_date = DateTime.Now;
 
             var errorMessage = userToUpdate.ValidateUser();
             
@@ -148,22 +148,22 @@ namespace DAL.Data
 
         public User UpdateUserMoney(int userId, double money)
         {
-            var userToPutMoney = Users.FirstOrDefault(u => u.UserId == userId);
+            var userToPutMoney = Users.FirstOrDefault(u => u.user_id == userId);
             
             if (userToPutMoney == null)
             {
                 throw new NotFoundException("User not found");
             }
 
-            userToPutMoney.UserMoney += money switch
+            userToPutMoney.user_money += money switch
             {
                 0 => throw new BadRequestException("You can't put 0 in this method"),
-                < 0 when userToPutMoney.UserMoney - money >= 0 => money,
+                < 0 when userToPutMoney.user_money - money >= 0 => money,
                 < 0 => throw new BadRequestException("Not enough money"),
                 _ => money
             };
 
-            if (userToPutMoney.UserMoney <= 0)
+            if (userToPutMoney.user_money <= 0)
             {
                 throw new BadRequestException("Not enough money");
             }
@@ -174,7 +174,7 @@ namespace DAL.Data
 
         public User DeleteUser(int userId)
         {
-            var userToDelete = Users.SingleOrDefault(u => u.UserId == userId);
+            var userToDelete = Users.SingleOrDefault(u => u.user_id == userId);
             
             if (userToDelete == null)
             {
@@ -189,7 +189,7 @@ namespace DAL.Data
 
         public User ChangeUserRole(int userId, UserRole role)
         {
-            var userToChangeRole = Users.FirstOrDefault(u => u.UserId == userId);
+            var userToChangeRole = Users.FirstOrDefault(u => u.user_id == userId);
             
             if (userToChangeRole == null)
             {
@@ -201,7 +201,7 @@ namespace DAL.Data
                 throw new BadRequestException("Invalid user role");
             }
 
-            userToChangeRole.UserRole = role;
+            userToChangeRole.user_role = role;
 
             SaveChanges();
             return userToChangeRole;
@@ -211,7 +211,7 @@ namespace DAL.Data
             ProductType productType, double productPrice, int productStock)
         {
             
-            var seller = Users.FirstOrDefault(u => u.UserId == sellerId);
+            var seller = Users.FirstOrDefault(u => u.user_id == sellerId);
             
             if (seller == null)
             {
@@ -230,15 +230,15 @@ namespace DAL.Data
             
             var newProduct = new Product()
             {
-                ProductName = productName,
-                ProductDescription = productDescription,
-                ProductType = productType,
-                ProductPrice = productPrice,
-                ProductStock = productStock,
-                Available = true,
-                AddedTime = DateTime.Now,
-                UpdatedTime = null,
-                FK_UserId = sellerId
+                product_name = productName,
+                product_description = productDescription,
+                product_type = productType,
+                product_price = productPrice,
+                product_stock = productStock,
+                available = true,
+                added_time = DateTime.Now,
+                updated_time = null,
+                fk_user_id = sellerId
             };
 
             Products.Add(newProduct);
@@ -249,17 +249,17 @@ namespace DAL.Data
         
         public Product GetProductById(int productId)
         {
-            return Products.Include(p => p.Seller).SingleOrDefault(p => p.ProductId == productId)!;
+            return Products.Include(p => p.seller).SingleOrDefault(p => p.product_id == productId)!;
         }
 
         public Product GetProductByName(string productName)
         {
-            return Products.Include(p => p.Seller).SingleOrDefault(p => p.ProductName == productName)!;
+            return Products.Include(p => p.seller).SingleOrDefault(p => p.product_name == productName)!;
         }
 
         public IEnumerable<Product> GetProducts()
         {
-            return Products.Include(p=>p.Seller).ToList();
+            return Products.Include(p=>p.seller).ToList();
         }
         
         public IEnumerable<Product> GetProductSortedBy(SortCategory sortCategory, int limit)
@@ -273,11 +273,11 @@ namespace DAL.Data
             
             query = sortCategory switch
             {
-                SortCategory.Date => query.OrderByDescending(p => p.AddedTime),
-                SortCategory.Type => query.OrderBy(p => p.ProductType),
-                SortCategory.Name => query.OrderBy(p => p.ProductName),
-                SortCategory.Price => query.OrderBy(p => p.ProductPrice),
-                _ => query.OrderByDescending(p => p.AddedTime)
+                SortCategory.Date => query.OrderByDescending(p => p.added_time),
+                SortCategory.Type => query.OrderBy(p => p.product_type),
+                SortCategory.Name => query.OrderBy(p => p.product_name),
+                SortCategory.Price => query.OrderBy(p => p.product_price),
+                _ => query.OrderByDescending(p => p.added_time)
             };
 
             return query.Take(limit).ToList();
@@ -286,7 +286,7 @@ namespace DAL.Data
         public Product UpdateProduct(int productId, string productName, string productDescription,
             ProductType productType, double? productPrice, int? productStock, bool? available)
         {
-            var productToUpdate = Products.Include(p=>p.Seller).FirstOrDefault(p => p.ProductId == productId);
+            var productToUpdate = Products.Include(p=>p.seller).FirstOrDefault(p => p.product_id == productId);
             
             if (productToUpdate == null)
             {
@@ -295,35 +295,35 @@ namespace DAL.Data
 
             if (!productName.IsNullOrEmpty())
             {
-                productToUpdate.ProductName = productName;
+                productToUpdate.product_name = productName;
             }
             
             if (!productDescription.IsNullOrEmpty())
             {
-                productToUpdate.ProductDescription = productDescription;
+                productToUpdate.product_description = productDescription;
             }
             
-            if (productType != productToUpdate.ProductType)
+            if (productType != productToUpdate.product_type)
             {
-                productToUpdate.ProductType = productType;
+                productToUpdate.product_type = productType;
             }
             
             if (productPrice != null)
             {
-                productToUpdate.ProductPrice = productPrice.Value;
+                productToUpdate.product_price = productPrice.Value;
             }
             
             if (productStock != null)
             {
-                productToUpdate.ProductStock = productStock.Value;
+                productToUpdate.product_stock = productStock.Value;
             }
             
             if (available != null)
             {
-                productToUpdate.Available = available.Value;
+                productToUpdate.available = available.Value;
             }
             
-            productToUpdate.UpdatedTime = DateTime.Now;
+            productToUpdate.updated_time = DateTime.Now;
             
             SaveChanges();
             return productToUpdate;
@@ -331,7 +331,7 @@ namespace DAL.Data
         
         public Product DeleteProduct(int productId)
         {
-            var productToDelete = Products.SingleOrDefault(p => p.ProductId == productId);
+            var productToDelete = Products.SingleOrDefault(p => p.product_id == productId);
             
             if (productToDelete == null)
             {
@@ -346,14 +346,14 @@ namespace DAL.Data
 
         public IEnumerable<Cart> GetCart(int userId)
         {
-            var userToGetCart = Users.FirstOrDefault(u => u.UserId == userId);
+            var userToGetCart = Users.FirstOrDefault(u => u.user_id == userId);
             
             if (userToGetCart == null)
             {
                 throw new NotFoundException("User not found");
             }
 
-            var cart = Carts.Where(c => c.FK_UserId == userId).Include(c=>c.Product).ToList();
+            var cart = Carts.Where(c => c.fk_user_id == userId).Include(c=>c.product).ToList();
             /*
             if (cart.Count == 0)
             {
@@ -365,14 +365,14 @@ namespace DAL.Data
 
         public void AddProductToCart(int userId, int productId, int quantity)
         {
-            var userToAddProductToCart = Users.FirstOrDefault(u => u.UserId == userId);
+            var userToAddProductToCart = Users.FirstOrDefault(u => u.user_id == userId);
             
             if (userToAddProductToCart == null)
             {
                 throw new NotFoundException("User not found");
             }
 
-            var productToAddToCart = Products.FirstOrDefault(p => p.ProductId == productId);
+            var productToAddToCart = Products.FirstOrDefault(p => p.product_id == productId);
             
             if (productToAddToCart == null)
             {
@@ -384,27 +384,27 @@ namespace DAL.Data
                 throw new BadRequestException("Quantity must be positive");
             }
 
-            if (productToAddToCart.ProductStock <= quantity)
+            if (productToAddToCart.product_stock <= quantity)
             {
                 throw new BadRequestException("Not enough stock");
             }
 
-            var existingCart = Carts.FirstOrDefault(c => c.FK_UserId == userId);
+            var existingCart = Carts.FirstOrDefault(c => c.fk_user_id == userId);
             
             if(existingCart != null)
             {
-                existingCart.Quantity += quantity;
+                existingCart.quantity += quantity;
             }
             
             else
             {
                 var newCart = new Cart()
                 {
-                    FK_ProductId = productId,
-                    Product = productToAddToCart,
-                    FK_UserId = userId,
-                    User = userToAddProductToCart,
-                    Quantity = quantity
+                    fk_produc_id = productId,
+                    product = productToAddToCart,
+                    fk_user_id = userId,
+                    user = userToAddProductToCart,
+                    quantity = quantity
                 };
 
                 Carts.Add(newCart);
@@ -415,14 +415,14 @@ namespace DAL.Data
 
         public User RemoveProductFromCart(int userId, int productId, int quantity)
         {
-            var userToRemoveProductFromCart = Users.FirstOrDefault(u => u.UserId == userId);
+            var userToRemoveProductFromCart = Users.FirstOrDefault(u => u.user_id == userId);
             
             if (userToRemoveProductFromCart == null)
             {
                 throw new NotFoundException("User not found");
             }
 
-            var productToRemoveFromCart = Products.FirstOrDefault(p => p.ProductId == productId);
+            var productToRemoveFromCart = Products.FirstOrDefault(p => p.product_id == productId);
             
             if (productToRemoveFromCart == null)
             {
@@ -434,19 +434,19 @@ namespace DAL.Data
                 throw new BadRequestException("Quantity must be positive");
             }
 
-            var productInCart = Carts.FirstOrDefault(c => c.FK_UserId == userId && c.FK_ProductId == productId);
+            var productInCart = Carts.FirstOrDefault(c => c.fk_user_id == userId && c.fk_produc_id == productId);
             
             if (productInCart == null)
             {
                 throw new NotFoundException("Product not in cart");
             }
 
-            if (quantity > productInCart.Quantity)
+            if (quantity > productInCart.quantity)
             {
                 throw new BadRequestException("Quantity in cart is less than quantity to remove");
             }
 
-            if (quantity == productInCart.Quantity)
+            if (quantity == productInCart.quantity)
             {
                 Carts.Remove(productInCart);
                 
@@ -454,7 +454,7 @@ namespace DAL.Data
                 return userToRemoveProductFromCart;
             }
 
-            productInCart.Quantity -= quantity;
+            productInCart.quantity -= quantity;
             
             SaveChanges();
             return userToRemoveProductFromCart;
@@ -463,27 +463,27 @@ namespace DAL.Data
 
         public User BuyCart(int userId)
         {
-            var userToBuyCart = Users.FirstOrDefault(u => u.UserId == userId);
+            var userToBuyCart = Users.FirstOrDefault(u => u.user_id == userId);
             
             if (userToBuyCart == null)
             {
                 throw new NotFoundException("User not found");
             }
-            var cart = Carts.Include(c => c.Product).Where(c => c.FK_UserId == userId).ToList();
+            var cart = Carts.Include(c => c.product).Where(c => c.fk_user_id == userId).ToList();
             
             if (cart.Count == 0)
             {
                 throw new BadRequestException("Cart is empty");
             }
             
-            var totalPrice = cart.Sum(product => product.Product.ProductPrice * product.Quantity);
+            var totalPrice = cart.Sum(product => product.product.product_price * product.quantity);
 
-            if (userToBuyCart.UserMoney < totalPrice)
+            if (userToBuyCart.user_money < totalPrice)
             {
                 throw new BadRequestException("Not enough money");
             }
             
-            userToBuyCart.UserMoney -= totalPrice;
+            userToBuyCart.user_money -= totalPrice;
 
             Carts.RemoveRange(cart);
             

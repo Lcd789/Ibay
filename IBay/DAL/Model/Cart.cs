@@ -6,18 +6,18 @@ namespace DAL.Model
     public sealed class Cart
     {
         [Key]
-        public int CartId { get; set; }
+        public int cart_id { get; set; }
 
         [ForeignKey("Product")]
-        public int FK_ProductId { get; set; }
-        public Product Product { get; set; }
+        public int fk_produc_id { get; set; }
+        public Product product { get; set; }
 
         [ForeignKey("User")]
-        public int FK_UserId { get; set; }
-        public User User { get; set; }
+        public int fk_user_id { get; set; }
+        public User user { get; set; }
         
         [Required]
         [Column(TypeName = "int")]
-        public int Quantity { get; set; }
+        public int quantity { get; set; }
     }
 }

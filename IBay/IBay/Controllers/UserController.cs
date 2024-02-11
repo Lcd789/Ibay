@@ -63,7 +63,7 @@ namespace IBay.Controllers
             }
             try
             {
-                var updatedUser = context.UpdateUser(id, user.UserEmail, user.UserPseudo, user.UserPassword);
+                var updatedUser = context.UpdateUser(id, user.user_email, user.user_pseudo, user.user_password);
                 if (updatedUser == null)
                 {
                     return NotFound();
