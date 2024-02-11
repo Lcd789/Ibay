@@ -3,6 +3,7 @@ using DAL.Model;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
+
 namespace DAL.Data
 {
     public enum SortCategory
@@ -38,6 +39,22 @@ namespace DAL.Data
                 .EnableDetailedErrors();
         }
 
+        public class NotFoundException : Exception
+        {
+            public NotFoundException(string message) : base(message)
+            {
+            }
+        }
+
+        public class BadRequestException : Exception
+        {
+            public BadRequestException(string message) : base(message)
+            {
+            }
+        }
+
+
+
         public User CreateUser(string userPseudo, string userEmail, string userPassword)
         {
             var salt = BCrypt.Net.BCrypt.GenerateSalt();
@@ -58,7 +75,7 @@ namespace DAL.Data
             
             if (!string.IsNullOrEmpty(errorMessage))
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException(errorMessage);
+                throw new BadRequestException(errorMessage);
             }
             
             Users.Add(newUser);
@@ -122,7 +139,7 @@ namespace DAL.Data
             
             if (!string.IsNullOrEmpty(errorMessage))
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException(errorMessage);
+                throw new BadRequestException(errorMessage);
             }
             
             SaveChanges();
@@ -135,21 +152,20 @@ namespace DAL.Data
             
             if (userToPutMoney == null)
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
+                throw new NotFoundException("User not found");
             }
 
             userToPutMoney.UserMoney += money switch
             {
-                0 => throw new System.ComponentModel.DataAnnotations.ValidationException(
-                    "You can't put 0 in this method"),
+                0 => throw new BadRequestException("You can't put 0 in this method"),
                 < 0 when userToPutMoney.UserMoney - money >= 0 => money,
-                < 0 => throw new System.ComponentModel.DataAnnotations.ValidationException("Not enough money"),
+                < 0 => throw new BadRequestException("Not enough money"),
                 _ => money
             };
 
             if (userToPutMoney.UserMoney <= 0)
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("Not enough money");
+                throw new BadRequestException("Not enough money");
             }
 
             SaveChanges();
@@ -162,7 +178,7 @@ namespace DAL.Data
             
             if (userToDelete == null)
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
+                throw new NotFoundException("User not found");
             }
 
             Users.Remove(userToDelete);
@@ -177,12 +193,12 @@ namespace DAL.Data
             
             if (userToChangeRole == null)
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
+                throw new NotFoundException("User not found");
             }
 
             if (!Enum.IsDefined(typeof(UserRole), role))
             {
-                throw new ArgumentException("Invalid user role");
+                throw new BadRequestException("Invalid user role");
             }
 
             userToChangeRole.UserRole = role;
@@ -199,7 +215,17 @@ namespace DAL.Data
             
             if (seller == null)
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("Seller not found");
+                throw new NotFoundException("Seller not found");
+            }
+
+            if (productPrice <= 0)
+            {
+                throw new BadRequestException("Price must be positive");
+            }
+
+            if (productStock <= 0)
+            {
+                throw new BadRequestException("Stock must be positive");
             }
             
             var newProduct = new Product()
@@ -209,6 +235,7 @@ namespace DAL.Data
                 ProductType = productType,
                 ProductPrice = productPrice,
                 ProductStock = productStock,
+                Available = true,
                 AddedTime = DateTime.Now,
                 UpdatedTime = null,
                 FK_UserId = sellerId
@@ -222,24 +249,24 @@ namespace DAL.Data
         
         public Product GetProductById(int productId)
         {
-            return Products.SingleOrDefault(p => p.ProductId == productId)!;
+            return Products.Include(p => p.Seller).SingleOrDefault(p => p.ProductId == productId)!;
         }
 
         public Product GetProductByName(string productName)
         {
-            return Products.SingleOrDefault(p => p.ProductName == productName)!;
+            return Products.Include(p => p.Seller).SingleOrDefault(p => p.ProductName == productName)!;
         }
 
         public IEnumerable<Product> GetProducts()
         {
-            return Products.ToList();
+            return Products.Include(p=>p.Seller).ToList();
         }
         
         public IEnumerable<Product> GetProductSortedBy(SortCategory sortCategory, int limit)
         {
             if (limit.GetType() != typeof(int))
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("Limit must be an integer");
+                throw new BadRequestException("Limit must be an integer");
             }
             
             IQueryable<Product> query = Products;
@@ -259,11 +286,11 @@ namespace DAL.Data
         public Product UpdateProduct(int productId, string productName, string productDescription,
             ProductType productType, double? productPrice, int? productStock, bool? available)
         {
-            var productToUpdate = Products.FirstOrDefault(p => p.ProductId == productId);
+            var productToUpdate = Products.Include(p=>p.Seller).FirstOrDefault(p => p.ProductId == productId);
             
             if (productToUpdate == null)
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("Product not found");
+                throw new NotFoundException("Product not found");
             }
 
             if (!productName.IsNullOrEmpty())
@@ -308,7 +335,7 @@ namespace DAL.Data
             
             if (productToDelete == null)
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("Product not found");
+                throw new NotFoundException("Product not found");
             }
 
             Products.Remove(productToDelete);
@@ -323,16 +350,15 @@ namespace DAL.Data
             
             if (userToGetCart == null)
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
+                throw new NotFoundException("User not found");
             }
 
-            var cart = Carts.Where(c => c.FK_UserId == userId).Include(c=>c.Product)
-                .ToList();
-            
+            var cart = Carts.Where(c => c.FK_UserId == userId).Include(c=>c.Product).ToList();
+            /*
             if (cart.Count == 0)
             {
                 throw new System.ComponentModel.DataAnnotations.ValidationException("Cart is empty");
-            }
+            }*/
 
             return cart;
         }
@@ -343,24 +369,24 @@ namespace DAL.Data
             
             if (userToAddProductToCart == null)
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
+                throw new NotFoundException("User not found");
             }
 
             var productToAddToCart = Products.FirstOrDefault(p => p.ProductId == productId);
             
             if (productToAddToCart == null)
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("Product not found");
+                throw new NotFoundException("Product not found");
             }
             
             if (quantity <= 0)
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("Quantity must be positive");
+                throw new BadRequestException("Quantity must be positive");
             }
 
             if (productToAddToCart.ProductStock <= quantity)
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("Not enough stock");
+                throw new BadRequestException("Not enough stock");
             }
 
             var existingCart = Carts.FirstOrDefault(c => c.FK_UserId == userId);
@@ -386,38 +412,38 @@ namespace DAL.Data
             }
         }
         
+
         public User RemoveProductFromCart(int userId, int productId, int quantity)
         {
             var userToRemoveProductFromCart = Users.FirstOrDefault(u => u.UserId == userId);
             
             if (userToRemoveProductFromCart == null)
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
+                throw new NotFoundException("User not found");
             }
 
             var productToRemoveFromCart = Products.FirstOrDefault(p => p.ProductId == productId);
             
             if (productToRemoveFromCart == null)
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("Product not found");
+                throw new NotFoundException("Product not found");
             }
 
             if (quantity <= 0)
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("Quantity must be positive");
+                throw new BadRequestException("Quantity must be positive");
             }
 
             var productInCart = Carts.FirstOrDefault(c => c.FK_UserId == userId && c.FK_ProductId == productId);
             
             if (productInCart == null)
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("Product not in cart");
+                throw new NotFoundException("Product not in cart");
             }
 
             if (quantity > productInCart.Quantity)
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("Quantity in cart is " +
-                    "less than quantity to remove");
+                throw new BadRequestException("Quantity in cart is less than quantity to remove");
             }
 
             if (quantity == productInCart.Quantity)
@@ -434,26 +460,27 @@ namespace DAL.Data
             return userToRemoveProductFromCart;
         }
 
+
         public User BuyCart(int userId)
         {
             var userToBuyCart = Users.FirstOrDefault(u => u.UserId == userId);
             
             if (userToBuyCart == null)
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("User not found");
+                throw new NotFoundException("User not found");
             }
-            var cart = Carts.Where(c => c.FK_UserId == userId).ToList();
+            var cart = Carts.Include(c => c.Product).Where(c => c.FK_UserId == userId).ToList();
             
             if (cart.Count == 0)
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("Cart is empty");
+                throw new BadRequestException("Cart is empty");
             }
             
             var totalPrice = cart.Sum(product => product.Product.ProductPrice * product.Quantity);
 
             if (userToBuyCart.UserMoney < totalPrice)
             {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("Not enough money");
+                throw new BadRequestException("Not enough money");
             }
             
             userToBuyCart.UserMoney -= totalPrice;

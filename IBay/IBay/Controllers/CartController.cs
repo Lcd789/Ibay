@@ -2,11 +2,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Security.Claims;
 
 namespace IBay.Controllers
 {
     [ApiController]
-    [Route("api/[controller]/{userId:int}")]
+    [Route("api/[controller]")]
     [Authorize]
     [SwaggerTag("Cart Endpoints")]
     public class CartController(IIbayContext context) : ControllerBase
@@ -14,37 +15,94 @@ namespace IBay.Controllers
         [HttpPut("")]
         [SwaggerOperation("Buy a cart")]
         [SwaggerResponse(200, "Cart bought successfully")]
-        public IActionResult BuyCart(int userId)
+        public IActionResult BuyCart()
         {
-            var cart = context.BuyCart(userId);
-            return Ok(cart);
+            try
+            {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                context.BuyCart(userId);
+                var cart = context.GetCart(userId);
+                return Ok(cart);
+            }
+            catch(IbayContext.NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch(IbayContext.BadRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            
         }
+
+
 
         [HttpPost("{productId:int}/{quantity:int}")]
         [SwaggerOperation("Add a product to cart")]
         [SwaggerResponse(200, "Product added to cart successfully")]
-        public IActionResult AddProductToCart(int userId, int productId, int quantity)
+        public IActionResult AddProductToCart(int productId, int quantity)
         {
-            context.AddProductToCart(userId, productId, quantity);
-            return Ok();
+            try
+            {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                context.AddProductToCart(userId, productId, quantity);
+                var cart = context.GetCart(userId);
+                return Ok(cart);
+            }
+            catch(IbayContext.NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch(IbayContext.BadRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            
         }
+
+
 
         [HttpDelete("{productId:int}/{quantity:int}")]
         [SwaggerOperation("Remove a product from cart")]
         [SwaggerResponse(200, "Product removed from cart successfully")]
-        public IActionResult RemoveProductFromCart(int userId, int productId, int quantity)
+        public IActionResult RemoveProductFromCart(int productId, int quantity)
         {
-            var cart = context.RemoveProductFromCart(userId, productId, quantity);
-            return Ok(cart);
+            try
+            {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                context.RemoveProductFromCart(userId, productId, quantity);
+                var cart = context.GetCart(userId);
+                return Ok(cart);
+            }
+            catch(IbayContext.NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch(IbayContext.BadRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            
         }
+
+
 
         [HttpGet("")]
         [SwaggerOperation("Get a cart")]
         [SwaggerResponse(200, "Cart retrieved successfully")]
-        public IActionResult GetCart(int userId)
+        public IActionResult GetCart()
         {
-            var cart = context.GetCart(userId);
-            return Ok(cart);
+            try
+            {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var cart = context.GetCart(userId);
+                return Ok(cart);
+            }
+            catch(IbayContext.NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            
         }
     }
 }

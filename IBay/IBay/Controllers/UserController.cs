@@ -19,8 +19,13 @@ namespace IBay.Controllers
         [SwaggerResponse(200, "User created successfully")]
         public IActionResult Create(string userPseudo, string userEmail, string userPassword)
         {
-            var newUser = context.CreateUser(userPseudo, userEmail, userPassword);
-            return Ok(newUser);
+            try { 
+                var newUser = context.CreateUser(userPseudo, userEmail, userPassword);
+                return Ok(newUser);
+            }catch(IbayContext.BadRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet]
@@ -56,14 +61,21 @@ namespace IBay.Controllers
             {
                 return Forbid();
             }
-
-            var updatedUser = context.UpdateUser(id, user.UserEmail, user.UserPseudo, user.UserPassword);
-            if (updatedUser == null)
+            try
             {
-                return NotFound();
-            }
+                var updatedUser = context.UpdateUser(id, user.UserEmail, user.UserPseudo, user.UserPassword);
+                if (updatedUser == null)
+                {
+                    return NotFound();
+                }
 
-            return Ok(updatedUser);
+                return Ok(updatedUser);
+            }catch(IbayContext.BadRequestException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+                
+            
         }
 
         [HttpPut("{id:int}/money/{money:double}")]
@@ -72,12 +84,22 @@ namespace IBay.Controllers
         [SwaggerResponse(404, "User not found")]
         public IActionResult UpdateMoney(int id, double money)
         {
-            var updatedUser = context.UpdateUserMoney(id, money);
-            if (updatedUser == null)
+            try
             {
-                return NotFound();
+                var updatedUser = context.UpdateUserMoney(id, money);
+                if (updatedUser == null)
+                {
+                    return NotFound();
+                }
+                return Ok(updatedUser);
+            }catch(IbayContext.NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }catch(IbayContext.BadRequestException ex)
+            {
+                return BadRequest(ex.Message);
             }
-            return Ok(updatedUser);
+            
         }
 
         [HttpDelete("{id:int}")]
@@ -90,14 +112,20 @@ namespace IBay.Controllers
             {
                 return Forbid();
             }
-
-            var user = context.DeleteUser(id);
-            if (user == null)
+            try
             {
-                return NotFound();
-            }
+                var user = context.DeleteUser(id);
+                if (user == null)
+                {
+                    return NotFound();
+                }
 
-            return Ok(user);
+                return Ok(user);
+            }catch(IbayContext.NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            
         }
     }
 }

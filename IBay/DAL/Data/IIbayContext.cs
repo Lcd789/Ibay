@@ -23,5 +23,7 @@ namespace DAL.Data
         User RemoveProductFromCart(int userId, int productId, int quantity);
         User BuyCart(int userId);
         IEnumerable<Cart> GetCart(int userId);
+
+
     }
 }
