@@ -354,12 +354,6 @@ namespace DAL.Data
             }
 
             var cart = Carts.Where(c => c.fk_user_id == userId).Include(c=>c.product).ToList();
-            /*
-            if (cart.Count == 0)
-            {
-                throw new System.ComponentModel.DataAnnotations.ValidationException("Cart is empty");
-            }*/
-
             return cart;
         }
 
@@ -411,7 +405,6 @@ namespace DAL.Data
                 SaveChanges();
             }
         }
-        
 
         public User RemoveProductFromCart(int userId, int productId, int quantity)
         {
