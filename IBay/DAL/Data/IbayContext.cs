@@ -130,7 +130,9 @@ namespace DAL.Data
             
             if (!userPassword.IsNullOrEmpty())
             {
-                userToUpdate.user_password = userPassword;
+                var salt = BCrypt.Net.BCrypt.GenerateSalt();
+                var hashedPassword = BCrypt.Net.BCrypt.HashPassword(userPassword, salt);
+                userToUpdate.user_password = hashedPassword;
             }
             
             userToUpdate.updated_date = DateTime.Now;

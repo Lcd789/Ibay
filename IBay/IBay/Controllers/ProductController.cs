@@ -17,10 +17,11 @@ namespace IBay.Controllers
         [HttpPost("{sellerId:int}")]
         [SwaggerOperation("Create a new product")]
         [SwaggerResponse(200, "Product created successfully")]
-        public IActionResult Create(int sellerId, string productName, string productDescription,ProductType productType, double productPrice, int productStock)
+        public IActionResult Create(int sellerId, string productName, string productDescription, int productTypeInt, double productPrice, int productStock)
         {
             try
             {
+                var productType = (ProductType)productTypeInt;
                 var newProduct = context.CreateProduct(sellerId, productName, productDescription,
                 productType, productPrice, productStock);
                 return Ok(newProduct);
@@ -60,10 +61,11 @@ namespace IBay.Controllers
         [HttpGet("sort")]
         [SwaggerOperation("Get sorted products")]
         [SwaggerResponse(200, "List of sorted products")]
-        public IActionResult Get(SortCategory sortCategory, int limit)
+        public IActionResult Get(int sortCategoryInt, int limit)
         {
             try
             {
+                var sortCategory = (SortCategory)sortCategoryInt;
                 var products = context.GetProductSortedBy(sortCategory, limit);
                 return Ok(products);
             }
@@ -78,7 +80,7 @@ namespace IBay.Controllers
         [SwaggerOperation("Update a product")]
         [SwaggerResponse(200, "Product updated successfully")]
         [SwaggerResponse(404, "Product not found")]
-        public IActionResult Update(int id, string updatedProductName, string updatedProductDescription, ProductType updatedProductType, double updatedProductPrice, int updatedProductStock, bool updatedProductAvailable )
+        public IActionResult Update(int id, string updatedProductName, string updatedProductDescription, int updatedProductTypeInt, double updatedProductPrice, int updatedProductStock, bool updatedProductAvailable )
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var productToCheck = context.GetProductById(id);
@@ -95,6 +97,7 @@ namespace IBay.Controllers
 
             try
             {
+                var updatedProductType = (ProductType)updatedProductTypeInt;
                 var updatedProduct = context.UpdateProduct(id, updatedProductName, updatedProductDescription, updatedProductType, updatedProductPrice, updatedProductStock, updatedProductAvailable);
                 if (updatedProduct == null)
                 {

@@ -12,14 +12,14 @@ namespace IBay.Controllers
     [SwaggerTag("Cart Endpoints")]
     public class CartController(IIbayContext context) : ControllerBase
     {
-        [HttpPut("")]
+        [HttpPut]
         [SwaggerOperation("Buy a cart")]
         [SwaggerResponse(200, "Cart bought successfully")]
         public IActionResult BuyCart()
         {
             try
             {
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
                 context.BuyCart(userId);
                 var cart = context.GetCart(userId);
                 return Ok(cart);
@@ -44,7 +44,7 @@ namespace IBay.Controllers
         {
             try
             {
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
                 context.AddProductToCart(userId, productId, quantity);
                 var cart = context.GetCart(userId);
                 return Ok(cart);
@@ -69,7 +69,7 @@ namespace IBay.Controllers
         {
             try
             {
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
                 context.RemoveProductFromCart(userId, productId, quantity);
                 var cart = context.GetCart(userId);
                 return Ok(cart);
@@ -84,17 +84,15 @@ namespace IBay.Controllers
             }
             
         }
-
-
-
-        [HttpGet("")]
+        
+        [HttpGet]
         [SwaggerOperation("Get a cart")]
         [SwaggerResponse(200, "Cart retrieved successfully")]
         public IActionResult GetCart()
         {
             try
             {
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
                 var cart = context.GetCart(userId);
                 return Ok(cart);
             }

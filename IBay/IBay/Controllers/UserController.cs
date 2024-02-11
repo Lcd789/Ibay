@@ -55,7 +55,7 @@ namespace IBay.Controllers
         [SwaggerOperation("Update a user")]
         [SwaggerResponse(200, "User updated successfully")]
         [SwaggerResponse(404, "User not found")]
-        public IActionResult Update(int id, [FromBody] User user)
+        public IActionResult Update(int id, string userEmail, string userPseudo, string userPassword)
         {
             if (!IsSelfTargetting(HttpContext))
             {
@@ -63,19 +63,19 @@ namespace IBay.Controllers
             }
             try
             {
-                var updatedUser = context.UpdateUser(id, user.user_email, user.user_pseudo, user.user_password);
-                if (updatedUser == null)
+                var userToUpdate = context.GetUserById(id);
+                if (userToUpdate == null)
                 {
                     return NotFound();
                 }
+                var updatedUser = context.UpdateUser(id, userEmail, userPseudo, userPassword);
 
                 return Ok(updatedUser);
-            }catch(IbayContext.BadRequestException ex)
+            }
+            catch (IbayContext.BadRequestException ex)
             {
                 return BadRequest(ex.Message);
             }
-                
-            
         }
 
         [HttpPut("{id:int}/money/{money:double}")]
